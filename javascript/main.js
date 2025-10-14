@@ -31,11 +31,10 @@ function renderProducts(list) {
   grid.innerHTML = "";
 
   list.forEach(p => {
+    // nếu image là chỉ tên file thì thêm ../uploads/
     let imgSrc = p.image;
-
-    // Chuẩn hóa đường dẫn ảnh
-    if (!imgSrc.startsWith('http')) {
-      imgSrc = '../uploads/' + p.image.replace('../uploads/', '').replace('uploads/', '');
+    if (!imgSrc.startsWith('http') && !imgSrc.startsWith('../uploads/')) {
+      imgSrc = '../uploads/' + imgSrc;
     }
 
     grid.innerHTML += `
@@ -59,7 +58,6 @@ function renderProducts(list) {
     `;
   });
 }
-
 
 
 

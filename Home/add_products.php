@@ -14,29 +14,26 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
     if (!empty($_FILES['image']['name'])) {
         // Thư mục uploads nằm cùng cấp file PHP
-        $target_dir = "uploads/";
+       $target_dir = "../uploads/";
+if (!is_dir($target_dir)) {
+    mkdir($target_dir, 0755, true);
+}
 
-        // Tạo thư mục nếu chưa có
-        if (!is_dir($target_dir)) {
-            mkdir($target_dir, 0755, true);
-        }
+$fileName = time() . "_" . basename($_FILES["image"]["name"]);
+$target_file = $target_dir . $fileName;
+$fileType = strtolower(pathinfo($target_file, PATHINFO_EXTENSION));
 
-        $fileName = time() . "_" . basename($_FILES["image"]["name"]);
-        $target_file = $target_dir . $fileName;
-        $fileType = strtolower(pathinfo($target_file, PATHINFO_EXTENSION));
+$allowed = ['jpg','jpeg','png','gif'];
+if (!in_array($fileType, $allowed)) {
+    echo json_encode(["status"=>"error","message"=>"invalid_image"]);
+    exit;
+}
 
-        $allowed = ['jpg','jpeg','png','gif'];
-        if (!in_array($fileType, $allowed)) {
-            echo json_encode(["status"=>"error","message"=>"invalid_image"]);
-            exit;
-        }
+if (move_uploaded_file($_FILES["image"]["tmp_name"], $target_file)) {
+    $relative_path = $fileName; // chỉ lưu tên file
 
-        if (move_uploaded_file($_FILES["image"]["tmp_name"], $target_file)) {
-            // CHỈ LƯU đường dẫn tương đối (vd: uploads/abc.jpg)
-            $relative_path = $target_file;
-
-            $stmt = $conn->prepare("INSERT INTO products (title, author, price, rating, category, image) VALUES (?, ?, ?, ?, ?, ?)");
-            $stmt->bind_param("ssddss", $title, $author, $price, $rating, $category, $relative_path);
+    $stmt = $conn->prepare("INSERT INTO products (title, author, price, rating, category, image) VALUES (?, ?, ?, ?, ?, ?)");
+    $stmt->bind_param("ssddss", $title, $author, $price, $rating, $category, $relative_path);
 
             if ($stmt->execute()) {
                 echo json_encode(["status"=>"success","message"=>"Product added successfully"]);
