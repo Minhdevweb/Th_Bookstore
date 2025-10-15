@@ -15,15 +15,42 @@ fetch('add_products.php')
   });
 
 // --- Lấy dữ liệu sản phẩm ---
-fetch('get_products.php')
-  .then(r => r.json())
-  .then(data => {
-    products = data;
-    renderProducts(products);
-  })
-  .catch(err => {
-    console.error('Error loading products:', err);
-  });
+let currentPage = 1;
+let totalPages = 1;
+
+function loadProducts(page = 1) {
+  fetch(`get_products.php?page=${page}`)
+    .then(r => r.json())
+    .then(data => {
+      if (data.status === 'success') {
+        products = data.products;
+        currentPage = data.currentPage;
+        totalPages = data.totalPages;
+        renderProducts(products);
+        renderPagination();
+      }
+    })
+    .catch(err => console.error('Error loading products:', err));
+}
+// gọi khi vào trang
+loadProducts(); // Gọi khi vào trang
+
+function renderPagination() {
+  const pagDiv = document.getElementById('pagination');
+  pagDiv.innerHTML = `
+    <button id="prevPage" ${currentPage <= 1 ? "disabled" : ""}>Previous</button>
+    <span>Page ${currentPage} / ${totalPages}</span>
+    <button id="nextPage" ${currentPage >= totalPages ? "disabled" : ""}>Next</button>
+  `;
+
+  document.getElementById('prevPage').onclick = () => {
+    if (currentPage > 1) loadProducts(currentPage - 1);
+  };
+
+  document.getElementById('nextPage').onclick = () => {
+    if (currentPage < totalPages) loadProducts(currentPage + 1);
+  };
+}
 
 // --- Hiển thị danh sách sản phẩm ---
 function renderProducts(list) {

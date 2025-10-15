@@ -51,6 +51,8 @@
     
     <main>
       <section class="grid" id="productGrid"></section>
+      <div id="pagination"></div>
+
     </main>
   </div>
 

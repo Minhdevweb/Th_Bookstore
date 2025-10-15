@@ -271,3 +271,7 @@ nav a.cart {
 .btn-edit:hover {
   background-color: #3e8e41;
 }
+#pagination {
+  text-align: center;
+  margin-top: 20px;
+}
