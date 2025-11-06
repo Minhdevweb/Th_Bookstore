@@ -2,14 +2,37 @@
 include "config.php";
 
 $email = $_POST['email'];
-$password = password_hash($_POST['password'], PASSWORD_DEFAULT);
+$password = $_POST['password'];
+$role = $_POST['role'] ?? 'customer'; // Lấy role từ form, mặc định là customer
 
-$stmt = $conn->prepare("INSERT INTO users (email, password) VALUES (?, ?)");
-$stmt->bind_param("ss", $email, $password);
+// Xác thực role hợp lệ
+if (!in_array($role, ['admin', 'customer'])) {
+    echo json_encode(['status' => 'error', 'message' => 'Invalid role']);
+    exit;
+}
 
-if ($stmt->execute()) echo "success";
-else echo "error";
+// Hash password luôn theo input người dùng
+$password = password_hash($password, PASSWORD_DEFAULT);
 
-$stmt->close();
+// Kiểm tra email đã tồn tại chưa
+$check = $conn->prepare("SELECT id FROM users WHERE email = ?");
+$check->bind_param("s", $email);
+$check->execute();
+$result = $check->get_result();
+
+if ($result->num_rows > 0) {
+    echo json_encode(['status' => 'error', 'message' => 'Email already exists']);
+} else {
+    $stmt = $conn->prepare("INSERT INTO users (email, password, role) VALUES (?, ?, ?)");
+    $stmt->bind_param("sss", $email, $password, $role);
+
+    if ($stmt->execute()) {
+        echo json_encode(['status' => 'success']);
+    } else {
+        echo json_encode(['status' => 'error', 'message' => $stmt->error]);
+    }
+    $stmt->close();
+}
+
 $conn->close();
 ?>

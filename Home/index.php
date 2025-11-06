@@ -5,8 +5,15 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>TH Bookstore</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
- <link rel="stylesheet" href="../CSS/style.css">
+        <!-- Inline SVG favicon to avoid missing /favicon.ico 404 in console -->
+        <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%230b5ed7'/%3E%3Cpath d='M20 25h40v50H20z' fill='%23fff'/%3E%3C/svg%3E">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="../CSS/style.css">
+    <script>
+        // Thêm biến toàn cục để kiểm tra role
+        const isAdmin = <?php echo isset($_SESSION['role']) && $_SESSION['role'] === 'admin' ? 'true' : 'false'; ?>;
+    </script>
+    
 </head>
 <body>
   <header>
@@ -17,9 +24,15 @@
         <i class="fas fa-search"></i>
       </div>
       <button id="themeToggle" class="btn"><i class="fas fa-adjust"></i></button>
-      <button id="loginBtn" class="btn">Login</button>
-      <button id="registerBtn" class="btn">Register</button>
-      <button id="addProductBtn" class="btn">Add Product</button>
+      <?php if (isset($_SESSION['email'])): ?>
+        <a href="logout.php" id="logoutBtn" class="btn">Logout</a>
+      <?php else: ?>
+        <button id="loginBtn" class="btn">Login</button>
+        <button id="registerBtn" class="btn">Register</button>
+      <?php endif; ?>
+      <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?>
+        <button id="addProductBtn" class="btn">Add Product</button>
+      <?php endif; ?>
       <a href="#" id="cartBtn" class="btn cart"><i class="fas fa-shopping-cart"></i><span id="cartCount">0</span></a>
     </div>
   </header>
@@ -76,8 +89,13 @@
       <input id="regEmail" type="email" placeholder="you@example.com" required />
       <label for="regPwd">Password</label>
       <input id="regPwd" type="password" required minlength="6" />
-      <label for="regConfirm">Confirm Password</label>
-      <input id="regConfirm" type="password" required minlength="6" />
+    <label for="regConfirm">Confirm Password</label>
+    <input id="regConfirm" type="password" required minlength="6" />
+      <label for="regRole">Role</label>
+      <select id="regRole" required>
+        <option value="customer">Customer</option>
+        <option value="admin">Admin</option>
+      </select>
       <button id="submitReg" class="btn-modal">Sign Up</button>
     </div>
   </div>
@@ -112,6 +130,9 @@
       <label>Rating</label>
       <input id="prodRating" type="number" min="0" max="5" step="0.1" required />
 
+      <label>Stock</label>
+      <input id="prodStock" type="number" min="0" step="1" value="0" required />
+
       <label>Image File</label>
       <input id="prodImage" type="file" accept="image/*" required />
 
@@ -119,6 +140,26 @@
     </div>
   </div>
 
+  <!-- Modal Backdrop for all modals -->
+  <div class="modal-backdrop" id="modalBackdrop"></div>
+
+  <!-- Orders Modal -->
+  <div class="orders-modal" id="ordersModal">
+    <h2>My Orders</h2>
+    <div id="ordersList"></div>
+    <button onclick="closeModal('ordersModal')">Close</button>
+  </div>
+
+  <!-- Admin Orders Modal -->
+  <div class="orders-modal" id="adminOrdersModal">
+    <h2>Manage Orders</h2>
+    <div id="adminOrdersList"></div>
+    <button onclick="closeModal('adminOrdersModal')">Close</button>
+  </div>
+
+  <script src="../javascript/modal.js"></script>
   <script src="../javascript/main.js"></script>
+  <script src="../javascript/cart.js"></script>
+  <script src="../javascript/orders.js"></script>
 </body>
 </html>

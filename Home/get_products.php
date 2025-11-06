@@ -24,6 +24,7 @@ $totalProducts = $totalData['total'];
 $totalPages = ceil($totalProducts / $limit);
 
 // --- Lấy sản phẩm cho trang hiện tại ---
+$conn->query("ALTER TABLE products ADD COLUMN IF NOT EXISTS stock INT DEFAULT 0");
 $sql = "SELECT * FROM products ORDER BY id DESC LIMIT $start, $limit";
 $result = $conn->query($sql);
 
