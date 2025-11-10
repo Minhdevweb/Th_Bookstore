@@ -18,14 +18,15 @@ if ($page < 1) $page = 1;
 $start = ($page - 1) * $limit;
 
 // --- Lấy tổng số sản phẩm ---
-$totalQuery = $conn->query("SELECT COUNT(*) AS total FROM products");
+$conn->query("ALTER TABLE products ADD COLUMN IF NOT EXISTS is_active TINYINT(1) NOT NULL DEFAULT 1");
+$totalQuery = $conn->query("SELECT COUNT(*) AS total FROM products WHERE is_active = 1");
 $totalData = $totalQuery->fetch_assoc();
 $totalProducts = $totalData['total'];
 $totalPages = ceil($totalProducts / $limit);
 
 // --- Lấy sản phẩm cho trang hiện tại ---
 $conn->query("ALTER TABLE products ADD COLUMN IF NOT EXISTS stock INT DEFAULT 0");
-$sql = "SELECT * FROM products ORDER BY id DESC LIMIT $start, $limit";
+$sql = "SELECT * FROM products WHERE is_active = 1 ORDER BY id DESC LIMIT $start, $limit";
 $result = $conn->query($sql);
 
 $products = [];
