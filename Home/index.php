@@ -37,30 +37,44 @@
       <?php endif; ?>
       <a href="#" id="cartBtn" class="btn cart"><i class="fas fa-shopping-cart"></i><span id="cartCount">0</span></a>
     </div>
+    <a href="blog.php" class="btn blog-btn">
+      <i class="fas fa-book-open"></i> Blog
+    </a>
   </header>
 
   <div class="content">
     <aside class="filters">
       <h4>Filters</h4>
       <select id="category">
-        <option value="">All Categories</option>
+        <option value="">Tất cả danh sách</option>
         <option>English Books</option>
         <option>Vietnamese Books</option>
         <option>Stationery</option>
       </select>
       <select id="price">
-        <option value="">Price Range</option>
+        <option value="">Vùng giá</option>
         <option>Under $10</option>
         <option>$10-20</option>
         <option>$20-50</option>
         <option>Over $50</option>
       </select>
       <select id="rating">
-        <option value="">Min Rating</option>
+        <option value="">Tỉ lệ sao</option>
         <option>4.0</option>
         <option>4.5</option>
         <option>4.7</option>
       </select>
+      <div class="filter-group">
+        <p class="filter-label">Chủ đề cảm xúc</p>
+        <div class="mood-tags" id="moodTags">
+          <button type="button" class="mood-chip" data-value="Buồn">Buồn</button>
+          <button type="button" class="mood-chip" data-value="Vui">Vui</button>
+          <button type="button" class="mood-chip" data-value="Động lực">Động lực</button>
+          <button type="button" class="mood-chip" data-value="Hài hước">Hài hước</button>
+          <button type="button" class="mood-chip" data-value="Lãng mạn">Lãng mạn</button>
+          <button type="button" class="mood-chip" data-value="Phiêu lưu">Phiêu lưu</button>
+        </div>
+      </div>
       <button id="apply" class="btn-modal">Áp dụng</button>
     </aside>
     
@@ -124,7 +138,18 @@
       <input id="prodAuthor" type="text" required />
 
       <label>Thể loại</label>
-      <input id="prodCategory" type="text" required />
+      <input id="prodCategory" type="text" placeholder="Nhập hoặc chọn chủ đề cảm xúc" required />
+      <div class="filter-group mood-select-group">
+        <p class="filter-label">Chủ đề cảm xúc nhanh</p>
+        <div class="mood-tags admin-mood-tags">
+          <button type="button" class="mood-chip admin-mood-chip" data-value="Buồn">Buồn</button>
+          <button type="button" class="mood-chip admin-mood-chip" data-value="Vui">Vui</button>
+          <button type="button" class="mood-chip admin-mood-chip" data-value="Động lực">Động lực</button>
+          <button type="button" class="mood-chip admin-mood-chip" data-value="Hài hước">Hài hước</button>
+          <button type="button" class="mood-chip admin-mood-chip" data-value="Lãng mạn">Lãng mạn</button>
+          <button type="button" class="mood-chip admin-mood-chip" data-value="Phiêu lưu">Phiêu lưu</button>
+        </div>
+      </div>
 
       <label>Giá</label>
       <input id="prodPrice" type="number" min="0" step="0.01" required />
@@ -240,5 +265,6 @@
   <script src="../javascript/cart.js"></script>
   <script src="../javascript/orders.js"></script>
   <script src="../javascript/chatbot.js"></script>
+
 </body>
 </html>

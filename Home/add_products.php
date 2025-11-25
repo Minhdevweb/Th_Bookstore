@@ -21,8 +21,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $rating = floatval($_POST['rating'] ?? 0);
     $stock = intval($_POST['stock'] ?? 0);
 
-    // ensure stock column exists
+    // Đảm bảo các cột cần thiết tồn tại
     $conn->query("ALTER TABLE products ADD COLUMN IF NOT EXISTS stock INT DEFAULT 0");
+    $conn->query("ALTER TABLE products ADD COLUMN IF NOT EXISTS is_active TINYINT(1) NOT NULL DEFAULT 1");
 
     if (!empty($_FILES['image']['name'])) {
         // Thư mục uploads nằm cùng cấp file PHP
@@ -44,7 +45,8 @@ if (!in_array($fileType, $allowed)) {
 if (move_uploaded_file($_FILES["image"]["tmp_name"], $target_file)) {
     $relative_path = $fileName; // chỉ lưu tên file
 
-    $stmt = $conn->prepare("INSERT INTO products (title, author, price, rating, category, image, stock) VALUES (?, ?, ?, ?, ?, ?, ?)");
+    // Đảm bảo sản phẩm mới luôn có is_active = 1 để hiển thị trên blog
+    $stmt = $conn->prepare("INSERT INTO products (title, author, price, rating, category, image, stock, is_active) VALUES (?, ?, ?, ?, ?, ?, ?, 1)");
     $stmt->bind_param("ssddssi", $title, $author, $price, $rating, $category, $relative_path, $stock);
 
             if ($stmt->execute()) {
