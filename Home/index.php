@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="../CSS/style.css">
     <link rel="stylesheet" href="../CSS/chatbot.css">
     <link rel="stylesheet" href="../CSS/footer.css">
+    <link rel="stylesheet" href="../CSS/carousel.css">
     <script>
         // Thêm biến toàn cục để kiểm tra role
         const isAdmin = <?php echo isset($_SESSION['role']) && $_SESSION['role'] === 'admin' ? 'true' : 'false'; ?>;
@@ -41,6 +42,61 @@
       <i class="fas fa-book-open"></i> Blog
     </a>
   </header>
+ 
+  <!-- Hero banner giới thiệu 1–2 loại sách nổi bật -->
+  <section class="hero-section">
+    <div class="hero-copy">
+      <p class="hero-kicker" id="heroKicker">SÁCH NỔI BẬT TRONG NĂM</p>
+      <h1 id="heroMainTitle">BEST BOOKS OF THE YEAR</h1>
+      <p class="hero-subtitle">Giảm <span>30%</span> cho đơn hàng trên <strong>$199</strong></p>
+      <div class="hero-tags">
+        <span id="heroTagPrimary">English Books</span>
+        <span id="heroTagSecondary">Vietnamese Books</span>
+      </div>
+      <button class="hero-btn" onclick="document.getElementById('productGrid').scrollIntoView({ behavior: 'smooth' });">
+        VIEW ALL BOOKS
+      </button>
+    </div>
+    <div class="hero-visual">
+      <div class="hero-book">
+        <img id="heroImage" class="hero-image" src="../images/logo_thbooks.png" alt="Featured book">
+        <div class="hero-book-label" id="heroCategory">Editor's pick</div>
+        <div class="hero-book-title" id="heroTitle">The Ride of a Lifetime</div>
+        <div class="hero-book-author" id="heroAuthor">Bob Dover</div>
+      </div>
+      <div class="hero-badge">
+        <span>-30%</span>
+        <small>On order over $199</small>
+      </div>
+    </div>
+  </section>
+
+  <!-- Section giới thiệu nhà sách trực tuyến -->
+  <section class="intro-section">
+    <h2 class="intro-title">NHÀ SÁCH TRỰC TUYẾN DÀNH CHO BẠN</h2>
+    <p class="intro-text">
+      “Một nơi những câu chuyện được sống lại. Khám phá các tác phẩm kinh điển vượt thời gian,
+      những tựa sách hiện đại được yêu thích và những cuốn sách tuyển chọn dành riêng cho mọi độc giả.”
+    </p>
+    <div class="intro-badges">
+      <div class="intro-badge">
+        <i class="fas fa-truck-fast"></i>
+        <span>Giao hàng nhanh chóng</span>
+      </div>
+      <div class="intro-badge">
+        <i class="fas fa-book-open"></i>
+        <span>Sách chính hãng, đa dạng</span>
+      </div>
+      <div class="intro-badge">
+        <i class="fas fa-clock"></i>
+        <span>Đọc mọi lúc, mọi nơi</span>
+      </div>
+      <div class="intro-badge">
+        <i class="fas fa-gift"></i>
+        <span>Ưu đãi cho thành viên</span>
+      </div>
+    </div>
+  </section>
 
   <div class="content">
     <aside class="filters">
@@ -262,6 +318,7 @@
 
   <script src="../javascript/modal.js"></script>
   <script src="../javascript/main.js"></script>
+  <script src="../javascript/heroCarousel.js"></script>
   <script src="../javascript/cart.js"></script>
   <script src="../javascript/orders.js"></script>
   <script src="../javascript/chatbot.js"></script>

@@ -1,5 +1,6 @@
 <?php
 // Start session only if not started to avoid duplicate session_start notices
+// phân quyền
 if (session_status() !== PHP_SESSION_ACTIVE) {
     session_start();
 }
