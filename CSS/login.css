@@ -1,0 +1,162 @@
+ /* --- CẤU HÌNH CHUNG --- */
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            background-color: #333;
+            position: relative; /* Để chứa các thành phần tuyệt đối */
+        }
+
+        /* --- VIDEO NỀN --- */
+        .video-bg {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            object-fit: cover;
+            z-index: -10; /* Nằm dưới cùng */
+            filter: brightness(0.6); 
+        }
+
+        /* --- HIỆU ỨNG ICONS RƠI (MỚI) --- */
+        .falling-icon {
+            position: absolute;
+            top: -50px;
+            color: rgba(255, 255, 255, 0.4); /* Màu trắng mờ */
+            z-index: -5; /* Nằm trên video nhưng dưới Form */
+            animation: fall linear forwards; /* Hiệu ứng rơi */
+            pointer-events: none; /* Không che chắn click chuột */
+        }
+
+        @keyframes fall {
+            0% {
+                transform: translateY(0) rotate(0deg);
+                opacity: 0;
+            }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% {
+                transform: translateY(110vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        /* --- FORM CONTAINER --- */
+        .auth-container {
+            background: #ffffff;
+            width: 420px;
+            max-width: 90%;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            position: relative;
+            z-index: 10; /* Luôn nổi lên trên cùng */
+            animation: slideDown 0.5s ease-out;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Nút đóng (X) */
+        .close-btn {
+            position: absolute;
+            top: 15px; right: 20px;
+            font-size: 24px;
+            color: #aaa;
+            cursor: pointer;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .close-btn:hover { color: #333; }
+
+        /* Tiêu đề */
+        h2 {
+            text-align: center;
+            color: #1c4e80;
+            margin-bottom: 25px;
+            font-size: 26px;
+            font-weight: 700;
+        }
+
+        /* Input */
+        .form-group { margin-bottom: 15px; }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #444;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .form-group input, 
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            outline: none;
+            box-sizing: border-box;
+            transition: 0.3s;
+            background-color: #f9f9f9;
+        }
+
+        .form-group input:focus {
+            border-color: #1c4e80;
+            background-color: #fff;
+            box-shadow: 0 0 5px rgba(28, 78, 128, 0.2);
+        }
+
+        /* Button */
+        .btn-submit {
+            width: 100%;
+            padding: 12px;
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: background 0.3s;
+        }
+
+        .btn-submit:hover { background-color: #c0392b; }
+
+        /* Links */
+        .switch-text {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .switch-text a {
+            color: #1c4e80;
+            font-weight: bold;
+            cursor: pointer;
+            text-decoration: none;
+        }
+        .switch-text a:hover { text-decoration: underline; }
+
+        /* Message */
+        .message {
+            padding: 10px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+            font-size: 13px;
+            display: none;
+            text-align: center;
+        }
+        .message.error { background: #ffebee; color: #c62828; border: 1px solid #ef9a9a; }
+        .message.success { background: #e8f5e9; color: #2e7d32; border: 1px solid #a5d6a7; }
+
+        #register-box { display: none; }

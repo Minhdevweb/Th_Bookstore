@@ -1,0 +1,70 @@
+.footer {
+  background: #badfff;
+  padding: 48px 24px 32px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 32px;
+  font-size: 0.95rem;
+  color: #2c5e84;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.footer_column h4 {
+  font-size: 1rem;
+  margin-bottom: 16px;
+  text-transform: uppercase;
+  /* font-weight: 600; */
+  color: #2f9cdc;
+  font-weight: bold;
+}
+
+.footer_column a,
+.footer_column p {
+  display: block;
+  margin-bottom: 8px;
+  text-decoration: none;
+  color: #01579b;
+ transition: color 0.3s ease;
+}
+
+.footer_column a:hover {
+  color: #0288d1;
+}
+
+.footer_brand img {
+  max-width: 130px;
+  margin-bottom: 18px;
+  margin-left: 0px;
+  border-radius: 25px;
+}
+
+.footer_social a {
+  display: inline-flex;
+  width: 36px;
+  height: 36px;
+  margin-right: 10px;
+  border-radius: 50%;
+  align-items: center;
+  justify-content: center;
+  background: #b3e5fc;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+   transition: background 0.3s ease;
+}
+.footer_social a:hover {
+  background: #81d4fa; /* xanh sáng hơn khi hover */
+}
+
+.footer_social img {
+  width: 47px;
+  height: 34px;
+  margin-bottom: -1px;
+}
+
+.footer_badges img {
+  height: 34px;
+  margin-right: 12px;
+}
+
+.footer_contact span {
+  font-weight: 600;
+}
