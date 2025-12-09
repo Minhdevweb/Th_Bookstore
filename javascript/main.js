@@ -289,6 +289,11 @@ if (qs('#addProductBtn')) {
   qs('#addProductBtn').onclick = () => showModal('addProductModal');
 }
 
+// Open add product modal if requested by query (?open=addProduct)
+if (typeof openModalFromQuery !== 'undefined' && openModalFromQuery === 'addProduct') {
+  showModal('addProductModal');
+}
+
 // Cart button opens cart modal and updates UI
 if (qs('#cartBtn')) {
   qs('#cartBtn').onclick = () => {

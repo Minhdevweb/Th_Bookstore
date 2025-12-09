@@ -80,6 +80,7 @@ $stmtOrders->close();
     </header>
     <div class="subnav">
         <a href="admin_orders.php" class="btn btn-subnav active"><i class="fas fa-clipboard-list"></i> Quản lý đơn hàng</a>
+        <a href="index.php?open=addProduct" class="btn btn-subnav"><i class="fas fa-plus-circle"></i> Thêm sản phẩm</a>
         <a href="admin_dashboard.php" class="btn btn-subnav"><i class="fas fa-chart-line"></i> Thống kê</a>
     </div>
 

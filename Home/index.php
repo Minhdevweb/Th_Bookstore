@@ -18,6 +18,7 @@
         // Thêm biến toàn cục để kiểm tra role (Cần giữ lại PHP ở đây)
 
         const isAdmin = <?php echo isset($_SESSION['role']) && $_SESSION['role'] === 'admin' ? 'true' : 'false'; ?>;
+        const openModalFromQuery = <?php echo json_encode($_GET['open'] ?? ''); ?>;
     </script>
     
 </head>
@@ -157,43 +158,59 @@
   </div>
   
   <div class="modal" id="addProductModal">
-    <div class="modal-content">
+    <div class="modal-content add-product-card">
       <button class="close" data-close="addProductModal">&times;</button>
       <h3>Thêm Sản Phẩm</h3>
 
-      <label>Tiêu đề</label>
-      <input id="prodTitle" type="text" required />
+      <div class="add-product-grid">
+        <div class="form-field">
+          <label>Tiêu đề</label>
+          <input id="prodTitle" type="text" required />
+        </div>
 
-      <label>Tác giả</label>
-      <input id="prodAuthor" type="text" required />
+        <div class="form-field">
+          <label>Tác giả</label>
+          <input id="prodAuthor" type="text" required />
+        </div>
 
-      <label>Thể loại</label>
-      <input id="prodCategory" type="text" placeholder="Nhập hoặc chọn chủ đề cảm xúc" required />
-      <div class="filter-group mood-select-group">
-        <p class="filter-label">Chủ đề cảm xúc nhanh</p>
-        <div class="mood-tags admin-mood-tags">
-          <button type="button" class="mood-chip admin-mood-chip" data-value="Buồn">Buồn</button>
-          <button type="button" class="mood-chip admin-mood-chip" data-value="Vui">Vui</button>
-          <button type="button" class="mood-chip admin-mood-chip" data-value="Động lực">Động lực</button>
-          <button type="button" class="mood-chip admin-mood-chip" data-value="Hài hước">Hài hước</button>
-          <button type="button" class="mood-chip admin-mood-chip" data-value="Lãng mạn">Lãng mạn</button>
-          <button type="button" class="mood-chip admin-mood-chip" data-value="Phiêu lưu">Phiêu lưu</button>
+        <div class="form-field full">
+          <label>Thể loại</label>
+          <input id="prodCategory" type="text" placeholder="Nhập hoặc chọn chủ đề cảm xúc" required />
+          <div class="filter-group mood-select-group">
+            <p class="filter-label">Chủ đề cảm xúc nhanh</p>
+            <div class="mood-tags admin-mood-tags">
+              <button type="button" class="mood-chip admin-mood-chip" data-value="Buồn">Buồn</button>
+              <button type="button" class="mood-chip admin-mood-chip" data-value="Vui">Vui</button>
+              <button type="button" class="mood-chip admin-mood-chip" data-value="Động lực">Động lực</button>
+              <button type="button" class="mood-chip admin-mood-chip" data-value="Hài hước">Hài hước</button>
+              <button type="button" class="mood-chip admin-mood-chip" data-value="Lãng mạn">Lãng mạn</button>
+              <button type="button" class="mood-chip admin-mood-chip" data-value="Phiêu lưu">Phiêu lưu</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-field">
+          <label>Giá</label>
+          <input id="prodPrice" type="number" min="0" step="0.01" required />
+        </div>
+
+        <div class="form-field">
+          <label>Đánh giá</label>
+          <input id="prodRating" type="number" min="0" max="5" step="0.1" required />
+        </div>
+
+        <div class="form-field">
+          <label>Tồn kho</label>
+          <input id="prodStock" type="number" min="0" step="1" value="0" required />
+        </div>
+
+        <div class="form-field full">
+          <label>File Ảnh</label>
+          <input id="prodImage" type="file" accept="image/*" required />
         </div>
       </div>
 
-      <label>Giá</label>
-      <input id="prodPrice" type="number" min="0" step="0.01" required />
-
-      <label>Đánh giá</label>
-      <input id="prodRating" type="number" min="0" max="5" step="0.1" required />
-
-      <label>Tồn kho</label>
-      <input id="prodStock" type="number" min="0" step="1" value="0" required />
-
-      <label>File Ảnh</label>
-      <input id="prodImage" type="file" accept="image/*" required />
-
-      <button id="submitProduct" class="btn-modal">Thêm Sản Phẩm</button>
+      <button id="submitProduct" class="btn-modal btn-full">Thêm Sản Phẩm</button>
     </div>
   </div>
 

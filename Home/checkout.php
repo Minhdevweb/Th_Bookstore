@@ -69,6 +69,22 @@ foreach ($_SESSION['cart'] as $product_id => $quantity) {
           <label>Địa chỉ:</label>
           <textarea name="address" rows="4" placeholder="Nhập địa chỉ nhận hàng" required></textarea>
 
+          <div class="qr-box">
+            <p class="qr-title">Thanh toán chuyển khoản qua QR</p>
+            <p class="qr-desc">Quét mã để thanh toán. Vui lòng ghi rõ nội dung: <strong>Họ tên + SĐT</strong>.</p>
+            <div class="qr-row">
+              <div class="qr-img-wrap">
+                <img src="../images/qr1.jpg" alt="QR chuyển khoản">
+              </div>
+              <div class="qr-info">
+                <div><strong>Ngân hàng:</strong>Vietcombank</div>
+                <div><strong>Số tài khoản:</strong> 1023148671 </div>
+                <div><strong>Chủ tài khoản:</strong>VŨ TUẤN MINH</div>
+                <div><strong>Nội dung:</strong> Họ tên + SĐT</div>
+              </div>
+            </div>
+          </div>
+
           <button type="submit" class="btn-primary">✅ ĐẶT HÀNG NGAY</button>
         </form>
       </aside>
