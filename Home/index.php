@@ -11,9 +11,12 @@
     <link rel="stylesheet" href="../CSS/style.css">
     <link rel="stylesheet" href="../CSS/chatbot.css">
     <link rel="stylesheet" href="../CSS/footer.css">
+    <link rel="stylesheet" href="../CSS/wheel.css">
+    <link rel="stylesheet" href="../CSS/wheel-custom.css">
     <link rel="stylesheet" href="../CSS/carousel.css">
     <script>
-        // Thêm biến toàn cục để kiểm tra role
+        // Thêm biến toàn cục để kiểm tra role (Cần giữ lại PHP ở đây)
+
         const isAdmin = <?php echo isset($_SESSION['role']) && $_SESSION['role'] === 'admin' ? 'true' : 'false'; ?>;
     </script>
     
@@ -22,21 +25,24 @@
   <header>
     <div class="logo">TH BOOKs</div>
     <div class="controls">
-      <div class="search-wrapper">
+      <div class="controls-left">
+        <button id="themeToggle" class="btn"><i class="fas fa-adjust"></i></button>
+        <?php if (isset($_SESSION['email'])): ?>
+          <a href="order_history.php" class="btn"><i class="fas fa-history"></i> Lịch sử đơn hàng</a>
+          <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?>
+            <a href="admin_orders.php" class="btn"><i class="fas fa-warehouse"></i> Quản lý shop</a>
+          <?php endif; ?>
+          <a href="logout.php" class="btn">Đăng xuất</a>
+        <?php else: ?>
+          <a href="login.php" class="btn">Đăng nhập</a>
+          <!-- <a href="login.php" class="btn">Đăng ký</a> -->
+        <?php endif; ?>
+        <a href="#" id="cartBtn" class="btn cart"><i class="fas fa-shopping-cart"></i><span id="cartCount">0</span></a>
+      </div>
+      <div class="search-wrapper controls-right">
         <input type="search" id="search" placeholder="Search books..." />
         <i class="fas fa-search"></i>
       </div>
-      <button id="themeToggle" class="btn"><i class="fas fa-adjust"></i></button>
-      <?php if (isset($_SESSION['email'])): ?>
-        <a href="logout.php" id="logoutBtn" class="btn">Đăng xuất</a>
-      <?php else: ?>
-        <button id="loginBtn" class="btn">Đăng nhập</button>
-        <button id="registerBtn" class="btn">Đăng ký</button>
-      <?php endif; ?>
-      <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?>
-        <button id="addProductBtn" class="btn">Thêm sản phẩm</button>
-      <?php endif; ?>
-      <a href="#" id="cartBtn" class="btn cart"><i class="fas fa-shopping-cart"></i><span id="cartCount">0</span></a>
     </div>
     <a href="blog.php" class="btn blog-btn">
       <i class="fas fa-book-open"></i> Blog
@@ -97,7 +103,6 @@
       </div>
     </div>
   </section>
-
   <div class="content">
     <aside class="filters">
       <h4>Filters</h4>
@@ -139,37 +144,6 @@
       <div id="pagination"></div>
 
     </main>
-  </div>
-
-  <div class="modal" id="loginModal">
-    <div class="modal-content">
-      <button class="close" data-close="loginModal">&times;</button>
-      <h3>Login</h3>
-      <label for="loginEmail">Email</label>
-      <input id="loginEmail" type="email" placeholder="you@example.com" required />
-      <label for="loginPwd">Mật khẩu</label>
-      <input id="loginPwd" type="password" required minlength="6" />
-      <button id="submitLogin" class="btn-modal">Đăng nhập</button>
-    </div>
-  </div>
-
-  <div class="modal" id="regModal">
-    <div class="modal-content">
-      <button class="close" data-close="regModal">&times;</button>
-      <h3>Register</h3>
-      <label for="regEmail">Email</label>
-      <input id="regEmail" type="email" placeholder="you@example.com" required />
-      <label for="regPwd">Password</label>
-      <input id="regPwd" type="password" required minlength="6" />
-    <label for="regConfirm">Xác nhận mật khẩu</label>
-    <input id="regConfirm" type="password" required minlength="6" />
-      <label for="regRole">Role</label>
-      <select id="regRole" required>
-        <option value="customer">Customer</option>
-        <option value="admin">Admin</option>
-      </select>
-      <button id="submitReg" class="btn-modal">Đăng ký</button>
-    </div>
   </div>
 
   <div class="modal" id="cartModal">
@@ -227,6 +201,7 @@
   <div class="modal-backdrop" id="modalBackdrop"></div>
 
   <!-- Orders Modal -->
+
   <div class="orders-modal" id="ordersModal">
     <h2>My Orders</h2>
     <div id="ordersList"></div>
@@ -239,31 +214,27 @@
     <div id="adminOrdersList"></div>
     <button onclick="closeModal('adminOrdersModal')">Đóng</button>
   </div>
-
         <!-- tạo chatbot gợi ý sách -->
         <button id="chatbotBtn" class="chatbot-toggle" aria-label="Mở chatbot tư vấn">
           <i class="fas fa-robot" aria-hidden="true"></i>
         </button>
 
-
-
         <!-- chatbot window -->
         <div class="chatbot-window" id="chatbotWindow">
-  <div class="chatbot-header">
-    <h3>Chatbot Tư Vấn Sách</h3>
-    <button class="chatbot-close" id="chatbotClose">&times;</button>
-  </div>
-  <div class="chatbot-messages" id="chatbotMessages">
-    <!-- Messages sẽ được thêm vào đây bằng JavaScript -->
-  </div>
-  <div class="chatbot-input">
-    <input type="text" id="chatbotInput" placeholder="Nhập câu hỏi của bạn...">
-    <button id="chatbotSend"><i class="fas fa-paper-plane"></i></button>
-  </div>
-</div>
-
+          <div class="chatbot-header">
+            <h3>Chatbot Tư Vấn Sách</h3>
+            <button class="chatbot-close" id="chatbotClose">&times;</button>
+          </div>
+          <div class="chatbot-messages" id="chatbotMessages">
+            <!-- Messages sẽ được thêm vào đây bằng JavaScript -->
+          </div>
+          <div class="chatbot-input">
+            <input type="text" id="chatbotInput" placeholder="Nhập câu hỏi của bạn...">
+            <button id="chatbotSend"><i class="fas fa-paper-plane"></i></button>
+          </div>
+        </div>
 <!-- footer -->
- <footer class="footer">
+<footer class="footer">
         <div class="footer_collumn footer_brand">
           <img src="../images/thbooj.png" alt="th Books">
           <p>34 Trần Đại Nghĩa, Quận Hải Châu, Thành phố Đà Nẵng</p>
@@ -309,6 +280,7 @@
         <div class="footer_contact">
           <p><span>Địa chỉ:</span> 34 Trần Đại Nghĩa - Q.Hải Châu - TP.Đà Nẵng</p>
             <p><span>Email:</span> cskh@thBooks.com.vn</p>
+            <a href="#"><span>Về chúng tôi</span></a>
             <p><span>Hotline:</span> 1900636467</p>
         </div>
       </div>
@@ -322,6 +294,26 @@
   <script src="../javascript/cart.js"></script>
   <script src="../javascript/orders.js"></script>
   <script src="../javascript/chatbot.js"></script>
-
 </body>
+<div id="lucky-btn" onclick="openWheel()">
+    <i class="fas fa-gift fa-shake"></i>
+</div>
+
+<div id="wheelModal" class="wheel-modal">
+    <div class="wheel-content">
+        <span class="close-wheel" onclick="closeWheel()">&times;</span>
+        <h3>VÒNG QUAY MAY MẮN</h3>
+        
+        <div class="wheel-container">
+            <div class="marker"></div>
+            <canvas id="canvas" width="500" height="500"></canvas>
+            <div class="spin-btn" onclick="spin()">QUAY</div>
+        </div>
+
+        <p id="result-msg">Chúc bạn may mắn!</p>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+<script src="../javascript/wheel.js"></script>
 </html>

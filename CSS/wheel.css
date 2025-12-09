@@ -1,0 +1,6 @@
+/* Legacy entrypoint for wheel styles. 
+   The real styles now live in wheel-custom.css, so we simply import them here
+   to avoid 404 errors from existing HTML links. */
+@import url('./wheel-custom.css');
+
+

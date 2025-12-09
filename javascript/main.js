@@ -310,53 +310,7 @@ qsAll('.close').forEach((btn) => {
   });
 });
 
-// --- Đăng ký ---
-qs('#submitReg').onclick = async () => {
-  const email = qs('#regEmail').value;
-  const pwd = qs('#regPwd').value;
-  const confirmPwd = qs('#regConfirm').value;
-  const role = qs('#regRole').value;
-  const adminKey = '';
-
-  if (pwd !== confirmPwd) return alert('Passwords do not match');
-
-  try {
-    const r = await fetch('register.php', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: `email=${encodeURIComponent(email)}&password=${encodeURIComponent(pwd)}&role=${encodeURIComponent(role)}`
-    });
-    const res = await r.json();
-    if (res.status !== 'success') return alert('Registration failed: ' + (res.message || 'Unknown error'));
-    alert('Registered successfully');
-    qs('#regModal').classList.remove('active');
-    location.reload();
-  } catch (e) {
-    alert('Registration failed');
-  }
-};
-
-// No extra fields to toggle for role now
-
-// --- Đăng nhập ---
-qs('#submitLogin').onclick = async () => {
-  const email = qs('#loginEmail').value;
-  const pwd = qs('#loginPwd').value;
-  try {
-    const r = await fetch('login.php', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: `email=${email}&password=${pwd}`
-    });
-    const res = await r.json();
-    if (res.status !== 'success') return alert(res.message || 'Invalid login');
-    alert('Login successful');
-    qs('#loginModal').classList.remove('active');
-    location.reload();
-  } catch {
-    alert('Login failed');
-  }
-};
+// Auth logic is handled in auth.js
 
 // --- Dark mode ---
 const toggle = qs('#themeToggle');

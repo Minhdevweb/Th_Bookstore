@@ -1,0 +1,713 @@
+═══════════════════════════════════════════════════════════════
+  CODE LỊCH SỬ MUA HÀNG - COPY VÀO CÁC FILE
+═══════════════════════════════════════════════════════════════
+
+📁 FILE 1: Home/order_history.php
+───────────────────────────────────────────────────────────────
+
+<?php
+include "config.php";
+include "session.php";
+requireLogin();
+
+// Lấy user_id từ session
+$user_id = $_SESSION['user_id'];
+$is_admin = isAdmin();
+
+// Lấy danh sách đơn hàng.
+if ($is_admin) {
+    // Admin: Lấy TẤT CẢ đơn hàng
+    $sql = "SELECT o.*, p.title, p.image, u.email 
+            FROM orders o 
+            JOIN products p ON o.product_id = p.id 
+            JOIN users u ON o.user_id = u.id 
+            ORDER BY o.created_at DESC";
+    $stmt = $conn->prepare($sql);
+} else {
+    // Khách hàng: Chỉ lấy đơn hàng CỦA MÌNH
+    $sql = "SELECT o.*, p.title, p.image 
+            FROM orders o 
+            JOIN products p ON o.product_id = p.id 
+            WHERE o.user_id = ? 
+            ORDER BY o.created_at DESC";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("i", $user_id);
+}
+
+$stmt->execute();
+$result = $stmt->get_result();
+$orders = [];
+while ($row = $result->fetch_assoc()) {
+    $orders[] = $row;
+}
+$stmt->close();
+?>
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lịch sử mua hàng</title>
+    <link rel="stylesheet" href="../CSS/style.css">
+    <link rel="stylesheet" href="../CSS/order_history.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <header>
+        <div class="logo">TH BOOKs</div>
+        <div class="controls">
+            <a href="index.php" class="btn"><i class="fas fa-home"></i> Trang chủ</a>
+            <?php if ($is_admin): ?>
+                <a href="admin_orders.php" class="btn"><i class="fas fa-cog"></i> Quản lý đơn hàng</a>
+            <?php endif; ?>
+            <a href="logout.php" class="btn">Đăng xuất</a>
+        </div>
+    </header>
+
+    <div class="order-history-container">
+        <h1 class="page-title">
+            <i class="fas fa-history"></i> 
+            <?php echo $is_admin ? 'Tất cả đơn hàng' : 'Lịch sử mua hàng của bạn'; ?>
+        </h1>
+
+        <?php if (empty($orders)): ?>
+            <div class="empty-state">
+                <i class="fas fa-shopping-bag"></i>
+                <p>Bạn chưa có đơn hàng nào</p>
+                <a href="index.php" class="btn-primary">Mua sắm ngay</a>
+            </div>
+        <?php else: ?>
+            <div class="orders-list">
+                <?php foreach ($orders as $order): ?>
+                    <div class="order-card">
+                        <div class="order-header">
+                            <div class="order-info">
+                                <h3>
+                                    <i class="fas fa-book"></i> 
+                                    <?php echo htmlspecialchars($order['title']); ?>
+                                </h3>
+                                <?php if ($is_admin): ?>
+                                    <p class="customer-email">
+                                        <i class="fas fa-user"></i> 
+                                        <?php echo htmlspecialchars($order['email']); ?>
+                                    </p>
+                                <?php endif; ?>
+                                <p class="order-date">
+                                    <i class="fas fa-calendar"></i> 
+                                    <?php echo date('d/m/Y H:i', strtotime($order['created_at'])); ?>
+                                </p>
+                            </div>
+                            <div class="order-status status-<?php echo $order['status']; ?>">
+                                <?php
+                                $status_text = [
+                                    'pending' => 'Chờ xử lý',
+                                    'confirmed' => 'Đã xác nhận',
+                                    'shipping' => 'Đang giao hàng',
+                                    'delivered' => 'Đã giao hàng',
+                                    'cancelled' => 'Đã hủy'
+                                ];
+                                echo $status_text[$order['status']] ?? $order['status'];
+                                ?>
+                            </div>
+                        </div>
+
+                        <div class="order-details">
+                            <?php if ($order['image']): ?>
+                                <img src="../uploads/<?php echo htmlspecialchars($order['image']); ?>" 
+                                     alt="<?php echo htmlspecialchars($order['title']); ?>" 
+                                     class="product-image">
+                            <?php endif; ?>
+                            
+                            <div class="order-info-details">
+                                <div class="detail-row">
+                                    <span class="label">Số lượng:</span>
+                                    <span class="value"><?php echo $order['quantity']; ?> cuốn</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="label">Giá:</span>
+                                    <span class="value"><?php echo number_format($order['total'] / $order['quantity'], 0, ',', '.'); ?> VND/cuốn</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="label">Tổng tiền:</span>
+                                    <span class="value total-price"><?php echo number_format($order['total'], 0, ',', '.'); ?> VND</span>
+                                </div>
+                                
+                                <?php if (!empty($order['customer_name'])): ?>
+                                    <div class="detail-row">
+                                        <span class="label">Người nhận:</span>
+                                        <span class="value"><?php echo htmlspecialchars($order['customer_name']); ?></span>
+                                    </div>
+                                <?php endif; ?>
+                                
+                                <?php if (!empty($order['customer_phone'])): ?>
+                                    <div class="detail-row">
+                                        <span class="label">Số điện thoại:</span>
+                                        <span class="value"><?php echo htmlspecialchars($order['customer_phone']); ?></span>
+                                    </div>
+                                <?php endif; ?>
+                                
+                                <?php if (!empty($order['customer_address'])): ?>
+                                    <div class="detail-row">
+                                        <span class="label">Địa chỉ:</span>
+                                        <span class="value"><?php echo htmlspecialchars($order['customer_address']); ?></span>
+                                    </div>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+        <?php endif; ?>
+    </div>
+
+    <footer style="text-align: center; padding: 2rem; margin-top: 3rem; border-top: 1px solid var(--border);">
+        <p>&copy; 2025 TH Bookstore. All rights reserved.</p>
+    </footer>
+</body>
+</html>
+<?php $conn->close(); ?>
+
+
+📁 FILE 2: Home/admin_orders.php
+───────────────────────────────────────────────────────────────
+
+<?php
+include "config.php";
+include "session.php";
+requireLogin();
+requireAdmin(); // Chỉ admin mới được truy cập
+
+// Lấy tất cả đơn hàng
+$sql = "SELECT o.*, p.title, p.image, u.email 
+        FROM orders o 
+        JOIN products p ON o.product_id = p.id 
+        JOIN users u ON o.user_id = u.id 
+        ORDER BY o.created_at DESC";
+$result = $conn->query($sql);
+$orders = [];
+while ($row = $result->fetch_assoc()) {
+    $orders[] = $row;
+}
+?>
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý đơn hàng - Admin</title>
+    <link rel="stylesheet" href="../CSS/style.css">
+    <link rel="stylesheet" href="../CSS/order_history.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <header>
+        <div class="logo">TH BOOKs - Admin</div>
+        <div class="controls">
+            <a href="index.php" class="btn"><i class="fas fa-home"></i> Trang chủ</a>
+            <a href="order_history.php" class="btn"><i class="fas fa-history"></i> Lịch sử đơn hàng</a>
+            <a href="logout.php" class="btn">Đăng xuất</a>
+        </div>
+    </header>
+
+    <div class="order-history-container">
+        <h1 class="page-title">
+            <i class="fas fa-cog"></i> Quản lý đơn hàng
+        </h1>
+
+        <?php if (empty($orders)): ?>
+            <div class="empty-state">
+                <i class="fas fa-inbox"></i>
+                <p>Chưa có đơn hàng nào</p>
+            </div>
+        <?php else: ?>
+            <div class="orders-list">
+                <?php foreach ($orders as $order): ?>
+                    <div class="order-card admin-card">
+                        <div class="order-header">
+                            <div class="order-info">
+                                <h3>
+                                    <i class="fas fa-book"></i> 
+                                    <?php echo htmlspecialchars($order['title']); ?>
+                                </h3>
+                                <p class="customer-email">
+                                    <i class="fas fa-user"></i> 
+                                    Khách hàng: <?php echo htmlspecialchars($order['email']); ?>
+                                </p>
+                                <p class="order-date">
+                                    <i class="fas fa-calendar"></i> 
+                                    <?php echo date('d/m/Y H:i', strtotime($order['created_at'])); ?>
+                                </p>
+                                <p class="order-id">
+                                    <i class="fas fa-hashtag"></i> 
+                                    Mã đơn: #<?php echo $order['id']; ?>
+                                </p>
+                            </div>
+                            <div class="order-status status-<?php echo $order['status']; ?>">
+                                <?php
+                                $status_text = [
+                                    'pending' => 'Chờ xử lý',
+                                    'confirmed' => 'Đã xác nhận',
+                                    'shipping' => 'Đang giao hàng',
+                                    'delivered' => 'Đã giao hàng',
+                                    'cancelled' => 'Đã hủy'
+                                ];
+                                echo $status_text[$order['status']] ?? $order['status'];
+                                ?>
+                            </div>
+                        </div>
+
+                        <div class="order-details">
+                            <?php if ($order['image']): ?>
+                                <img src="../uploads/<?php echo htmlspecialchars($order['image']); ?>" 
+                                     alt="<?php echo htmlspecialchars($order['title']); ?>" 
+                                     class="product-image">
+                            <?php endif; ?>
+                            
+                            <div class="order-info-details">
+                                <div class="detail-row">
+                                    <span class="label">Số lượng:</span>
+                                    <span class="value"><?php echo $order['quantity']; ?> cuốn</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="label">Giá:</span>
+                                    <span class="value"><?php echo number_format($order['total'] / $order['quantity'], 0, ',', '.'); ?> VND/cuốn</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="label">Tổng tiền:</span>
+                                    <span class="value total-price"><?php echo number_format($order['total'], 0, ',', '.'); ?> VND</span>
+                                </div>
+                                
+                                <?php if (!empty($order['customer_name'])): ?>
+                                    <div class="detail-row">
+                                        <span class="label">Người nhận:</span>
+                                        <span class="value"><?php echo htmlspecialchars($order['customer_name']); ?></span>
+                                    </div>
+                                <?php endif; ?>
+                                
+                                <?php if (!empty($order['customer_phone'])): ?>
+                                    <div class="detail-row">
+                                        <span class="label">Số điện thoại:</span>
+                                        <span class="value"><?php echo htmlspecialchars($order['customer_phone']); ?></span>
+                                    </div>
+                                <?php endif; ?>
+                                
+                                <?php if (!empty($order['customer_address'])): ?>
+                                    <div class="detail-row">
+                                        <span class="label">Địa chỉ:</span>
+                                        <span class="value"><?php echo htmlspecialchars($order['customer_address']); ?></span>
+                                    </div>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+
+                        <!-- Phần cập nhật trạng thái cho admin -->
+                        <div class="admin-actions">
+                            <label>Cập nhật trạng thái:</label>
+                            <select class="status-select" data-order-id="<?php echo $order['id']; ?>">
+                                <option value="pending" <?php echo $order['status'] == 'pending' ? 'selected' : ''; ?>>Chờ xử lý</option>
+                                <option value="confirmed" <?php echo $order['status'] == 'confirmed' ? 'selected' : ''; ?>>Đã xác nhận</option>
+                                <option value="shipping" <?php echo $order['status'] == 'shipping' ? 'selected' : ''; ?>>Đang giao hàng</option>
+                                <option value="delivered" <?php echo $order['status'] == 'delivered' ? 'selected' : ''; ?>>Đã giao hàng</option>
+                                <option value="cancelled" <?php echo $order['status'] == 'cancelled' ? 'selected' : ''; ?>>Đã hủy</option>
+                            </select>
+                            <button class="btn-update-status" data-order-id="<?php echo $order['id']; ?>">
+                                <i class="fas fa-save"></i> Cập nhật
+                            </button>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+        <?php endif; ?>
+    </div>
+
+    <footer style="text-align: center; padding: 2rem; margin-top: 3rem; border-top: 1px solid var(--border);">
+        <p>&copy; 2025 TH Bookstore. All rights reserved.</p>
+    </footer>
+
+    <script src="../javascript/admin_orders.js"></script>
+</body>
+</html>
+<?php $conn->close(); ?>
+
+
+📁 FILE 3: CSS/order_history.css
+───────────────────────────────────────────────────────────────
+
+/* CSS cho trang lịch sử đơn hàng - Đơn giản và dễ hiểu */
+
+.order-history-container {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+}
+
+.page-title {
+    font-size: 2rem;
+    color: var(--primary);
+    margin-bottom: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* Trạng thái khi chưa có đơn hàng */
+.empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+}
+
+.empty-state i {
+    font-size: 4rem;
+    color: var(--border);
+    margin-bottom: 1rem;
+}
+
+.empty-state p {
+    font-size: 1.2rem;
+    color: var(--text);
+    margin-bottom: 1.5rem;
+}
+
+/* Danh sách đơn hàng */
+.orders-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+/* Card đơn hàng */
+.order-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    transition: box-shadow var(--transition);
+}
+
+.order-card:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+/* Header của đơn hàng */
+.order-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.order-info h3 {
+    font-size: 1.3rem;
+    color: var(--primary);
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.customer-email, .order-date, .order-id {
+    color: var(--text);
+    font-size: 0.9rem;
+    margin: 0.3rem 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* Trạng thái đơn hàng */
+.order-status {
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-weight: bold;
+    font-size: 0.9rem;
+    white-space: nowrap;
+}
+
+.status-pending {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.status-confirmed {
+    background: #d1ecf1;
+    color: #0c5460;
+}
+
+.status-shipping {
+    background: #cfe2ff;
+    color: #084298;
+}
+
+.status-delivered {
+    background: #d4edda;
+    color: #155724;
+}
+
+.status-cancelled {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+/* Chi tiết đơn hàng */
+.order-details {
+    display: flex;
+    gap: 1.5rem;
+    margin-top: 1rem;
+}
+
+.product-image {
+    width: 120px;
+    height: 150px;
+    object-fit: cover;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+}
+
+.order-info-details {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.detail-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.detail-row:last-child {
+    border-bottom: none;
+}
+
+.detail-row .label {
+    font-weight: bold;
+    color: var(--text);
+}
+
+.detail-row .value {
+    color: var(--text);
+}
+
+.total-price {
+    color: var(--secondary);
+    font-size: 1.2rem;
+    font-weight: bold;
+}
+
+/* Phần admin actions */
+.admin-actions {
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 2px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.admin-actions label {
+    font-weight: bold;
+    color: var(--text);
+}
+
+.status-select {
+    padding: 0.5rem 1rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--card-bg);
+    color: var(--text);
+    font-size: 1rem;
+    cursor: pointer;
+    min-width: 200px;
+}
+
+.btn-update-status {
+    padding: 0.5rem 1.5rem;
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: var(--radius);
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background var(--transition);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.btn-update-status:hover {
+    background: #1e4268;
+}
+
+.btn-primary {
+    padding: 0.75rem 1.5rem;
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: var(--radius);
+    text-decoration: none;
+    display: inline-block;
+    transition: background var(--transition);
+}
+
+.btn-primary:hover {
+    background: #1e4268;
+}
+
+/* Responsive cho mobile */
+@media (max-width: 768px) {
+    .order-header {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .order-details {
+        flex-direction: column;
+    }
+    
+    .product-image {
+        width: 100%;
+        height: auto;
+    }
+    
+    .admin-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .status-select {
+        width: 100%;
+    }
+}
+
+
+📁 FILE 4: javascript/admin_orders.js
+───────────────────────────────────────────────────────────────
+
+// JavaScript đơn giản để cập nhật trạng thái đơn hàng cho admin
+
+// Đợi trang load xong mới chạy code
+document.addEventListener('DOMContentLoaded', function() {
+    
+    // Tìm tất cả các nút "Cập nhật"
+    const updateButtons = document.querySelectorAll('.btn-update-status');
+    
+    // Duyệt qua từng nút và thêm sự kiện click
+    updateButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            // Lấy mã đơn hàng từ thuộc tính data-order-id
+            const orderId = this.getAttribute('data-order-id');
+            
+            // Tìm select box tương ứng với đơn hàng này
+            const statusSelect = document.querySelector(`.status-select[data-order-id="${orderId}"]`);
+            
+            // Lấy giá trị trạng thái mới
+            const newStatus = statusSelect.value;
+            
+            // Gọi hàm cập nhật
+            updateOrderStatus(orderId, newStatus);
+        });
+    });
+});
+
+// Hàm cập nhật trạng thái đơn hàng
+function updateOrderStatus(orderId, newStatus) {
+    // Hiển thị thông báo đang xử lý
+    if (confirm('Bạn có chắc muốn cập nhật trạng thái đơn hàng này?')) {
+        
+        // Tạo đối tượng FormData để gửi dữ liệu
+        const formData = new FormData();
+        formData.append('order_id', orderId);
+        formData.append('status', newStatus);
+        
+        // Gửi request đến server
+        fetch('update_order_status.php', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json()) // Chuyển đổi response thành JSON
+        .then(data => {
+            // Kiểm tra kết quả
+            if (data.status === 'success') {
+                alert('Cập nhật trạng thái thành công!');
+                // Reload trang để hiển thị trạng thái mới
+                location.reload();
+            } else {
+                alert('Lỗi: ' + (data.message || 'Không thể cập nhật trạng thái'));
+            }
+        })
+        .catch(error => {
+            // Xử lý lỗi nếu có
+            console.error('Lỗi:', error);
+            alert('Đã xảy ra lỗi khi cập nhật. Vui lòng thử lại.');
+        });
+    }
+}
+
+
+📁 FILE 5: Thêm link vào Home/index.php (phần header)
+───────────────────────────────────────────────────────────────
+
+Tìm dòng này trong file Home/index.php:
+      <?php if (isset($_SESSION['email'])): ?>
+
+        <a href="logout.php" class="btn">Đăng xuất</a>
+
+Thay thế bằng:
+      <?php if (isset($_SESSION['email'])): ?>
+        <a href="order_history.php" class="btn"><i class="fas fa-history"></i> Lịch sử đơn hàng</a>
+        <a href="logout.php" class="btn">Đăng xuất</a>
+
+
+═══════════════════════════════════════════════════════════════
+  HƯỚNG DẪN COPY CODE
+═══════════════════════════════════════════════════════════════
+
+BƯỚC 1: Tạo file order_history.php
+   - Tạo file mới: Home/order_history.php
+   - Copy toàn bộ code từ FILE 1 ở trên vào
+
+BƯỚC 2: Tạo file admin_orders.php  
+   - Tạo file mới: Home/admin_orders.php
+   - Copy toàn bộ code từ FILE 2 ở trên vào
+
+BƯỚC 3: Tạo file CSS
+   - Tạo file mới: CSS/order_history.css
+   - Copy toàn bộ code từ FILE 3 ở trên vào
+
+BƯỚC 4: Tạo file JavaScript
+   - Tạo file mới: javascript/admin_orders.js
+   - Copy toàn bộ code từ FILE 4 ở trên vào
+
+BƯỚC 5: Thêm link vào header
+   - Mở file: Home/index.php
+   - Tìm phần header (dòng 33-35)
+   - Thay thế theo hướng dẫn ở FILE 5
+
+═══════════════════════════════════════════════════════════════
+  KIỂM TRA SAU KHI COPY
+═══════════════════════════════════════════════════════════════
+
+✅ Kiểm tra các file đã tồn tại:
+   - Home/order_history.php
+   - Home/admin_orders.php
+   - CSS/order_history.css
+   - javascript/admin_orders.js
+   - Home/update_order_status.php (đã có sẵn)
+
+✅ Test thử:
+   1. Đăng nhập với tài khoản khách hàng
+   2. Vào trang order_history.php
+   3. Đăng nhập với tài khoản admin
+   4. Vào trang admin_orders.php
+   5. Thử cập nhật trạng thái đơn hàng
+
+═══════════════════════════════════════════════════════════════
+

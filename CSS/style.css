@@ -7,7 +7,7 @@
   --border: #ddd;
   --hover: rgba(0,0,0,0.05);
   --radius: 8px;
-  --transition: 0.3s;
+  --transition: 0.3s ease;
 }
 body.dark {
   --primary: #222;
@@ -19,11 +19,21 @@ body.dark {
   --hover: rgba(255,255,255,0.1);
 }
 * { box-sizing: border-box; margin:0; padding:0; }
+html { scroll-behavior: smooth; }
+a, button, .btn, input, select, textarea {
+  transition: background-color var(--transition), color var(--transition), border-color var(--transition), box-shadow var(--transition), transform var(--transition);
+}
+.card, .order-card, .product-card {
+  transition: box-shadow var(--transition), transform var(--transition), border-color var(--transition);
+}
 body {
   font-family: 'Segoe UI', sans-serif;
   background: var(--bg);
   color: var(--text);
   transition: background var(--transition), color var(--transition);
+}
+a, a:hover, a:focus {
+  text-decoration: none;
 }
 header {
   background: var(--primary);
@@ -41,7 +51,18 @@ header {
 .controls { 
     display:flex; 
     align-items:center; 
-    gap:1rem; 
+    gap:1rem;
+    flex: 1;
+}
+.controls-left {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+.controls-right {
+    margin-left: auto;
+    min-width: 230px;
 }
 .search-wrapper { 
     position:relative; 
@@ -217,7 +238,6 @@ nav a.cart {
      left:0; 
      width:100%; 
      height:100%;
-  background:rgba(0,0,0,0.5); 
   display:flex; 
   justify-content:center; 
   align-items:center;
@@ -235,8 +255,16 @@ nav a.cart {
   width: 100%;
   height: 100%;
   background: rgba(0,0,0,0.5);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
   z-index: 999;
+  transition: opacity 0.3s ease;
 }
+
+.modal-backdrop.active {
+  display: block;
+}
+
 .cart-modal, .orders-modal {
   display: none;
   position: fixed;
