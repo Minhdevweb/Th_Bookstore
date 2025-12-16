@@ -118,11 +118,11 @@ $stmt->close();
                                 </div>
                                 <div class="detail-row">
                                     <span class="label">Giá:</span>
-                                    <span class="value"><?php echo number_format($order['total'] / $order['quantity'], 0, ',', '.'); ?> VND/cuốn</span>
+                                    <span class="value">$<?php echo number_format($order['total'] / $order['quantity'], 2, '.', ','); ?>/cuốn</span>
                                 </div>
                                 <div class="detail-row">
                                     <span class="label">Tổng tiền:</span>
-                                    <span class="value total-price"><?php echo number_format($order['total'], 0, ',', '.'); ?> VND</span>
+                                    <span class="value total-price">$<?php echo number_format($order['total'], 2, '.', ','); ?></span>
                                 </div>
                                 
                                 <?php if (!empty($order['customer_name'])): ?>

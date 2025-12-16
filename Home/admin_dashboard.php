@@ -78,17 +78,17 @@ if ($res) {
     <div class="dash-grid">
       <div class="dash-card">
         <div class="dash-title"><i class="fas fa-wallet"></i> Doanh thu hôm nay</div>
-        <div class="dash-value"><?php echo number_format($revenueToday, 0, ',', '.'); ?> VND</div>
+        <div class="dash-value">$<?php echo number_format($revenueToday, 2, '.', ','); ?></div>
         <div class="dash-sub">Đơn đã giao trong ngày</div>
       </div>
       <div class="dash-card">
         <div class="dash-title"><i class="fas fa-calendar-alt"></i> Doanh thu tháng này</div>
-        <div class="dash-value"><?php echo number_format($revenueMonth, 0, ',', '.'); ?> VND</div>
+        <div class="dash-value">$<?php echo number_format($revenueMonth, 2, '.', ','); ?></div>
         <div class="dash-sub">Đơn đã giao trong tháng</div>
       </div>
       <div class="dash-card">
         <div class="dash-title"><i class="fas fa-sack-dollar"></i> Doanh thu tích lũy</div>
-        <div class="dash-value"><?php echo number_format($revenueAll, 0, ',', '.'); ?> VND</div>
+        <div class="dash-value">$<?php echo number_format($revenueAll, 2, '.', ','); ?></div>
         <div class="dash-sub">Tất cả đơn đã giao</div>
       </div>
       <div class="dash-card">
@@ -120,7 +120,7 @@ if ($res) {
               <tr>
                 <td><?php echo htmlspecialchars($p['title']); ?></td>
                 <td><?php echo (int)$p['qty']; ?></td>
-                <td><?php echo number_format($p['amount'], 0, ',', '.'); ?> VND</td>
+                <td>$<?php echo number_format($p['amount'], 2, '.', ','); ?></td>
               </tr>
             <?php endforeach; ?>
           </tbody>
