@@ -44,7 +44,7 @@ foreach ($_SESSION['cart'] as $product_id => $quantity) {
         <?php foreach ($items as $it): ?>
           <p class="order-line">
             <?php echo htmlspecialchars($it['title']); ?> x <?php echo $it['quantity']; ?>
-            = <strong><?php echo number_format($it['total'], 0, ',', '.'); ?> VND</strong>
+            = <strong>$<?php echo number_format($it['total'], 2, '.', ','); ?></strong>
           </p>
           <?php if (isset($it['stock'])): ?>
             <p class="stock-note">Số lượng hiện có: <?php echo (int)$it['stock']; ?></p>
@@ -53,7 +53,7 @@ foreach ($_SESSION['cart'] as $product_id => $quantity) {
 
         <div class="total-pill">
           <span>💸 Tổng cộng:</span>
-          <strong><?php echo number_format($subtotal, 0, ',', '.'); ?> VND</strong>
+          <strong>$<?php echo number_format($subtotal, 2, '.', ','); ?></strong>
         </div>
       </section>
 

@@ -105,22 +105,22 @@ $stmtOrders->close();
         <div class="dash-grid" style="margin-bottom:1rem;">
           <div class="dash-card">
             <div class="dash-title"><i class="fas fa-wallet"></i> Doanh thu hôm nay</div>
-            <div class="dash-value"><?php echo number_format($revenueToday, 0, ',', '.'); ?> VND</div>
+            <div class="dash-value">$<?php echo number_format($revenueToday, 2, '.', ','); ?></div>
             <div class="dash-sub">Đơn đã giao trong ngày</div>
           </div>
           <div class="dash-card">
             <div class="dash-title"><i class="fas fa-calendar-alt"></i> Doanh thu tháng này</div>
-            <div class="dash-value"><?php echo number_format($revenueMonth, 0, ',', '.'); ?> VND</div>
+            <div class="dash-value">$<?php echo number_format($revenueMonth, 2, '.', ','); ?></div>
             <div class="dash-sub">Đơn đã giao trong tháng</div>
           </div>
           <div class="dash-card">
             <div class="dash-title"><i class="fas fa-sack-dollar"></i> Doanh thu tích lũy</div>
-            <div class="dash-value"><?php echo number_format($revenueAll, 0, ',', '.'); ?> VND</div>
+            <div class="dash-value">$<?php echo number_format($revenueAll, 2, '.', ','); ?></div>
             <div class="dash-sub">Tất cả đơn đã giao</div>
           </div>
           <div class="dash-card">
             <div class="dash-title"><i class="fas fa-sliders-h"></i> Doanh thu theo khoảng</div>
-            <div class="dash-value"><?php echo number_format($revenueRange, 0, ',', '.'); ?> VND</div>
+            <div class="dash-value">$<?php echo number_format($revenueRange, 2, '.', ','); ?></div>
             <div class="dash-sub">
               <?php if ($startDate || $endDate): ?>
                 <?php echo $startDate ? htmlspecialchars($startDate) : '...'; ?> → <?php echo $endDate ? htmlspecialchars($endDate) : '...'; ?>
@@ -187,11 +187,11 @@ $stmtOrders->close();
                                 </div>
                                 <div class="detail-row">
                                     <span class="label">Giá:</span>
-                                    <span class="value"><?php echo number_format($order['total'] / $order['quantity'], 0, ',', '.'); ?> VND/cuốn</span>
+                                    <span class="value">$<?php echo number_format($order['total'] / $order['quantity'], 2, '.', ','); ?>/cuốn</span>
                                 </div>
                                 <div class="detail-row">
                                     <span class="label">Tổng tiền:</span>
-                                    <span class="value total-price"><?php echo number_format($order['total'], 0, ',', '.'); ?> VND</span>
+                                    <span class="value total-price">$<?php echo number_format($order['total'], 2, '.', ','); ?></span>
                                 </div>
                                 
                                 <?php if (!empty($order['customer_name'])): ?>
