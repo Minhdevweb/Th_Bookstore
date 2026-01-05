@@ -1,18 +1,23 @@
 <?php
-session_start();
+// Xác thực người dùng đăng ký - đăng nhập - logout
+session_start(); // lưu trạng thái đăng nhập
+error_reporting(E_ALL);
+ini_set('display_errors', 0); // Tắt hiển thị lỗi để tránh output HTML
+ini_set('log_errors', 1); // Vẫn log lỗi vào log file
 include "config.php"; // Đảm bảo config.php đã kết nối $conn
-
+// Trả dữ liệu về dạng JSON cho frontend (AJAX)
 header('Content-Type: application/json');
-
+// Lấy hành động gửi từ client (register / login / logout)
 $action = $_POST['action'] ?? '';
 $response = ['status' => 'error', 'message' => 'Invalid action'];
-
+// xử lý theo từng hành động 
 switch ($action) {
     case 'register':
+        // lấy dữ liệu từ form
         $email = $_POST['email'] ?? '';
         $password = $_POST['password'] ?? '';
         $role = $_POST['role'] ?? 'customer'; 
-
+        // kiểm tra dữ liệu rỗng
         if (empty($email) || empty($password)) {
             $response = ['status' => 'error', 'message' => 'Vui lòng điền đầy đủ email và mật khẩu.'];
             break;
@@ -23,17 +28,17 @@ switch ($action) {
         $check->bind_param("s", $email);
         $check->execute();
         $result = $check->get_result();
-
+        //nếu email tồn tại 
         if ($result->num_rows > 0) {
             $response = ['status' => 'error', 'message' => 'Email đã tồn tại.'];
         } else {
-            // Hash password
+           //mã hóa mật khẩu
             $hashed_password = password_hash($password, PASSWORD_DEFAULT);
             
-            // Insert user
+            // thêm người dùng mới
             $stmt = $conn->prepare("INSERT INTO users (email, password, role) VALUES (?, ?, ?)");
             $stmt->bind_param("sss", $email, $hashed_password, $role);
-
+            // thực thi câu lệnh
             if ($stmt->execute()) {
                 $response = ['status' => 'success', 'message' => 'Đăng ký thành công!'];
             } else {
@@ -51,21 +56,29 @@ switch ($action) {
             $response = ['status' => 'error', 'message' => 'Vui lòng điền đầy đủ email và mật khẩu.'];
             break;
         }
+        // truy vấn lấu thông tin users
+       $stmt = $conn->prepare("SELECT id, password, role FROM users WHERE email=?");
+$stmt->bind_param("s", $email);
+$stmt->execute();
+//gắn kết quả truy vấn vào biến
+$stmt->bind_result($user_id, $hash, $role);
+// nếu tìm thấy user
+if ($stmt->fetch()) {
+    if ($hash !== null && password_verify($password, $hash)) { // so sánh mật khẩu người dùng nhập với mật khẩu đã mã hóa
+        //lưu thông tin vào session
+        $_SESSION['user_id'] = $user_id;
+        $_SESSION['email'] = $email;
+        $_SESSION['role'] = $role;
+        $response = ['status' => 'success', 'role' => $role]; // trả về thành công và vaitro
+    } else {
+        $response = ['status' => 'error', 'message' => 'Email hoặc mật khẩu không hợp lệ.'];
+    }
+} else {
+    $response = ['status' => 'error', 'message' => 'Email hoặc mật khẩu không hợp lệ.'];
+}
 
-        $stmt = $conn->prepare("SELECT id, password, role FROM users WHERE email=?");
-        $stmt->bind_param("s", $email);
-        $stmt->execute();
-        $stmt->bind_result($user_id, $hash, $role);
+$stmt->close();
 
-        if ($stmt->fetch() && password_verify($password, $hash)) {
-            $_SESSION['user_id'] = $user_id;
-            $_SESSION['email'] = $email;
-            $_SESSION['role'] = $role;
-            $response = ['status' => 'success', 'role' => $role];
-        } else {
-            $response = ['status' => 'error', 'message' => 'Email hoặc mật khẩu không hợp lệ.'];
-        }
-        $stmt->close();
         break;
 
     case 'logout':
@@ -80,5 +93,5 @@ switch ($action) {
 }
 
 $conn->close();
-echo json_encode($response);
+echo json_encode($response);// Trả JSON về cho client
 ?>

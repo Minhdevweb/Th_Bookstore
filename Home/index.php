@@ -38,7 +38,7 @@
           <a href="login.php" class="btn">Đăng nhập</a>
           <!-- <a href="login.php" class="btn">Đăng ký</a> -->
         <?php endif; ?>
-        <a href="#" id="cartBtn" class="btn cart"><i class="fas fa-shopping-cart"></i><span id="cartCount">0</span></a>
+        <a href="checkout.php" id="cartBtn" class="btn cart"><i class="fas fa-shopping-cart"></i><span id="cartCount">0</span></a>
       </div>
       <div class="search-wrapper controls-right">
         <input type="search" id="search" placeholder="Search books..." />
@@ -122,9 +122,11 @@
       </select>
       <select id="rating">
         <option value="">Tỉ lệ sao</option>
-        <option>4.0</option>
-        <option>4.5</option>
-        <option>4.7</option>
+        <option value="1-1.9">1 đến 1.9</option>
+        <option value="2-2.9">2 đến 2.9</option>
+        <option value="3-3.9">3 đến 3.9</option>
+        <option value="4-4.9">4 đến 4.9</option>
+        <option value="5">5 sao</option>
       </select>
       <div class="filter-group">
         <p class="filter-label">Chủ đề cảm xúc</p>
@@ -137,7 +139,10 @@
           <button type="button" class="mood-chip" data-value="Phiêu lưu">Phiêu lưu</button>
         </div>
       </div>
-      <button id="apply" class="btn-modal">Áp dụng</button>
+      <div style="display:flex; gap:0.6rem;">
+        <button id="apply" class="btn-modal">Áp dụng</button>
+        <button id="resetFilters" class="btn-modal">Quay lại</button>
+      </div>
     </aside>
     
     <main>
@@ -150,10 +155,15 @@
   <div class="modal" id="cartModal">
     <div class="modal-content">
       <button class="close" data-close="cartModal">&times;</button>
-      <h3>Your Cart</h3>
+      <h3>🛒 Giỏ hàng của bạn</h3>
       <div id="cartItems"></div>
-      <p>Total: $<span id="cartTotal">0.00</span></p>
-      <button id="checkout" class="btn-modal">Thanh Toán</button>
+      <div class="cart-footer">
+        <p class="cart-total">Tổng tiền: $<span id="cartTotal">0.00</span></p>
+        <div class="cart-actions">
+          <button id="continueShopping" class="btn-continue">← Tiếp tục mua sắm</button>
+          <button id="checkout" class="btn-modal">Thanh toán</button>
+        </div>
+      </div>
     </div>
   </div>
   

@@ -6,7 +6,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $id = intval($_POST['id'] ?? 0);
 
     if ($id <= 0) {
-        echo json_encode(["status" => "error", "message" => "Invalid product ID"]);
+        echo json_encode([
+            "status" => "error", 
+            "message" => "Invalid product ID"]);
         exit;
     }
 

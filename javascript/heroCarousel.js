@@ -88,7 +88,29 @@ function startHeroCarousel(items) {
 (async function initHeroCarousel() {
   try {
     const res = await fetch('get_all_products.php');
-    const data = await res.json();
+    const text = await res.text();
+    const contentType = res.headers.get('content-type') || '';
+    
+    // Kiểm tra nếu response không phải JSON
+    if (!contentType.includes('application/json')) {
+      console.error('Non-JSON response from get_all_products.php:', text.substring(0, 200));
+      return;
+    }
+    
+    // Kiểm tra nếu text bắt đầu bằng HTML tag
+    if (text.trim().startsWith('<')) {
+      console.error('HTML response received instead of JSON:', text.substring(0, 200));
+      return;
+    }
+    
+    let data;
+    try {
+      data = JSON.parse(text);
+    } catch (parseError) {
+      console.error('JSON parse error:', parseError);
+      console.error('Response text:', text.substring(0, 200));
+      return;
+    }
 
     if (data.status !== 'success') return;
     if (!Array.isArray(data.products) || !data.products.length) return;

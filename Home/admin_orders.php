@@ -1,45 +1,46 @@
+<!-- admin quảnt lý đơn hàng, xem doanh thu và lọc theo khoảng ngày -->
 <?php
 include "config.php";
 include "session.php";
 requireLogin();
 requireAdmin(); // Chỉ admin mới được truy cập
 
-// Helper to get single value
+// Helper lấy 1 giá trị từ spl
 function fetchValue(mysqli $conn, string $sql, string $types = '', array $params = []) {
     $stmt = $conn->prepare($sql);
     if ($types) {
-        $stmt->bind_param($types, ...$params);
+        $stmt->bind_param($types, ...$params); // gọi tham số động
     }
     $stmt->execute();
-    $stmt->bind_result($val);
+    $stmt->bind_result($val); // láy giá trị duy nhất
     $stmt->fetch();
     $stmt->close();
     return $val ?? 0;
 }
 
-// Bộ lọc khoảng ngày (YYYY-MM-DD)
+// Bộ lọc khoảng ngày (YYYY-MM-DD) , dunbgf get vì không thay đổi dữ liệu database
 $startDate = $_GET['start_date'] ?? '';
 $endDate   = $_GET['end_date'] ?? '';
 
 // Doanh thu mặc định (đơn đã giao)
 $revenueToday = fetchValue($conn, "SELECT COALESCE(SUM(total),0) FROM orders WHERE status='delivered' AND DATE(created_at)=CURDATE()");
 $revenueMonth = fetchValue($conn, "SELECT COALESCE(SUM(total),0) FROM orders WHERE status='delivered' AND DATE_FORMAT(created_at,'%Y-%m') = DATE_FORMAT(CURDATE(),'%Y-%m')");
-$revenueAll   = fetchValue($conn, "SELECT COALESCE(SUM(total),0) FROM orders WHERE status='delivered'");
+$revenueAll   = fetchValue($conn, "SELECT COALESCE(SUM(total),0) FROM orders WHERE status='delivered'"); // doah thu chỉ tính đơn đã giao
 
 // Doanh thu theo khoảng ngày (đơn đã giao)
 $types = '';
 $params = [];
-$rangeSql = "SELECT COALESCE(SUM(total),0) FROM orders WHERE status='delivered'";
-if ($startDate) { $rangeSql .= " AND DATE(created_at) >= ?"; $types .= 's'; $params[] = $startDate; }
-if ($endDate)   { $rangeSql .= " AND DATE(created_at) <= ?"; $types .= 's'; $params[] = $endDate; }
-$revenueRange = fetchValue($conn, $rangeSql, $types, $params);
+$rangeSql = "SELECT COALESCE(SUM(total),0) FROM orders WHERE status='delivered'"; // doanh thu theo khoảng ngày
+if ($startDate) { $rangeSql .= " AND DATE(created_at) >= ?"; $types .= 's'; $params[] = $startDate; } // nếu chọn ngayyf bắt đầu -> lọc từ ngày đó
+if ($endDate)   { $rangeSql .= " AND DATE(created_at) <= ?"; $types .= 's'; $params[] = $endDate; } // chỉ ngày kết thúc -> lọc đến ngày đó
+$revenueRange = fetchValue($conn, $rangeSql, $types, $params); // lấy cả 2 -> lọc theo khoảng
 
 // Lấy tất cả đơn hàng (có thể lọc theo khoảng ngày)
 $sql = "SELECT o.*, p.title, p.image, u.email 
         FROM orders o 
         JOIN products p ON o.product_id = p.id 
         JOIN users u ON o.user_id = u.id 
-        WHERE 1=1";
+        WHERE 1=1"; // điều kiện luôn đúng để dễ dàng thêm điều kiện lọc
 $typesOrders = '';
 $paramsOrders = [];
 if ($startDate) { $sql .= " AND DATE(o.created_at) >= ?"; $typesOrders .= 's'; $paramsOrders[] = $startDate; }
@@ -90,7 +91,7 @@ $stmtOrders->close();
         </h1>
 
         <!-- Thống kê nhanh + lọc khoảng ngày -->
-        <div class="dash-card" style="margin-bottom:1rem;">
+        <div class="dash-card">
           <form method="get" style="display:flex; gap:0.75rem; align-items:center; flex-wrap:wrap;">
             <strong><i class="fas fa-filter"></i> Lọc doanh thu:</strong>
             <label>Từ ngày:</label>
@@ -102,7 +103,7 @@ $stmtOrders->close();
           </form>
         </div>
 
-        <div class="dash-grid" style="margin-bottom:1rem;">
+        <div class="dash-grid">
           <div class="dash-card">
             <div class="dash-title"><i class="fas fa-wallet"></i> Doanh thu hôm nay</div>
             <div class="dash-value">$<?php echo number_format($revenueToday, 2, '.', ','); ?></div>

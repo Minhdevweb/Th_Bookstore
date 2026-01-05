@@ -42,8 +42,35 @@
             formData.append('action', 'login');
 
             fetch('auth.php', { method: 'POST', body: formData })
-            .then(res => res.json())
+            .then(async res => {
+                const text = await res.text();
+                const contentType = res.headers.get('content-type') || '';
+                
+                // Kiểm tra nếu response không phải JSON
+                if (!contentType.includes('application/json')) {
+                    console.error('Non-JSON response from auth.php:', text.substring(0, 200));
+                    showMessage(loginMsg, 'Lỗi server: Nhận được response không phải JSON.', 'error');
+                    return null;
+                }
+                
+                // Kiểm tra nếu text bắt đầu bằng HTML tag
+                if (text.trim().startsWith('<')) {
+                    console.error('HTML response received instead of JSON:', text.substring(0, 200));
+                    showMessage(loginMsg, 'Lỗi server: Nhận được HTML thay vì JSON.', 'error');
+                    return null;
+                }
+                
+                try {
+                    return JSON.parse(text);
+                } catch (parseError) {
+                    console.error('JSON parse error:', parseError);
+                    console.error('Response text:', text.substring(0, 200));
+                    showMessage(loginMsg, 'Lỗi server: Không thể parse JSON response.', 'error');
+                    return null;
+                }
+            })
             .then(data => {
+                if (!data) return; // Đã xử lý lỗi ở trên
                 if (data.status === 'success') {
                     showMessage(loginMsg, 'Đăng nhập thành công! Đang chuyển hướng...', 'success');
                     setTimeout(() => window.location.href = 'index.php', 1000);
@@ -51,7 +78,10 @@
                     showMessage(loginMsg, data.message || 'Lỗi đăng nhập.', 'error');
                 }
             })
-            .catch(() => showMessage(loginMsg, 'Lỗi kết nối server.', 'error'));
+            .catch(error => {
+                console.error('Error:', error);
+                showMessage(loginMsg, 'Lỗi kết nối server: ' + error.message, 'error');
+            });
         });
 
         document.getElementById('formRegister').addEventListener('submit', function(e) {
@@ -65,8 +95,35 @@
             formData.append('action', 'register');
 
             fetch('auth.php', { method: 'POST', body: formData })
-            .then(res => res.json())
+            .then(async res => {
+                const text = await res.text();
+                const contentType = res.headers.get('content-type') || '';
+                
+                // Kiểm tra nếu response không phải JSON
+                if (!contentType.includes('application/json')) {
+                    console.error('Non-JSON response from auth.php:', text.substring(0, 200));
+                    showMessage(regMsg, 'Lỗi server: Nhận được response không phải JSON.', 'error');
+                    return null;
+                }
+                
+                // Kiểm tra nếu text bắt đầu bằng HTML tag
+                if (text.trim().startsWith('<')) {
+                    console.error('HTML response received instead of JSON:', text.substring(0, 200));
+                    showMessage(regMsg, 'Lỗi server: Nhận được HTML thay vì JSON.', 'error');
+                    return null;
+                }
+                
+                try {
+                    return JSON.parse(text);
+                } catch (parseError) {
+                    console.error('JSON parse error:', parseError);
+                    console.error('Response text:', text.substring(0, 200));
+                    showMessage(regMsg, 'Lỗi server: Không thể parse JSON response.', 'error');
+                    return null;
+                }
+            })
             .then(data => {
+                if (!data) return; // Đã xử lý lỗi ở trên
                 if (data.status === 'success') {
                     showMessage(regMsg, 'Đăng ký thành công!', 'success');
                     setTimeout(() => {
@@ -78,5 +135,8 @@
                     showMessage(regMsg, data.message || 'Lỗi đăng ký.', 'error');
                 }
             })
-            .catch(() => showMessage(regMsg, 'Lỗi kết nối server.', 'error'));
+            .catch(error => {
+                console.error('Error:', error);
+                showMessage(regMsg, 'Lỗi kết nối server: ' + error.message, 'error');
+            });
         });

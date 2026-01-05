@@ -1,4 +1,4 @@
-<!-- blog.php - PHIÊN BẢN NÂNG CẤP -->
+<!-- blog.php -->
 <?php include "config.php"; 
 
 // Xử lý tìm kiếm
@@ -14,7 +14,8 @@ if ($search !== '') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= $search ? "Tìm kiếm: $search - " : "" ?>Sách Hay - TH Bookstore Blog</title>
+    <!-- tiêu đề động: có tìm kiếm -> hiển thị từ khóa , không -> tiêu đề mặc định -->
+    <title><?= $search ? "Tìm kiếm: $search - " : "" ?>Sách Hay - TH Bookstore Blog</title> 
      <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%230b5ed7'/%3E%3Cpath d='M20 25h40v50H20z' fill='%23fff'/%3E%3C/svg%3E">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="../CSS/blog.css?v=<?= time() ?>">
@@ -38,6 +39,7 @@ if ($search !== '') {
 
         <div class="book-grid">
             <h2>
+                <!-- Tiêu đề phần nội dung (động theo trạng thái) -->
                 <?php if ($search): ?>
                     Kết quả tìm kiếm cho: <strong>"<?= htmlspecialchars($search) ?>"</strong>
                 <?php elseif(isset($_GET['cat'])): ?>
@@ -46,10 +48,12 @@ if ($search !== '') {
                     Blog về sách
                 <?php endif; ?>
             </h2>
-
+                    <!-- danh sách sách -->
             <div class="books">
                 <?php
+                //lấy tất cả sản phẩm đang active 
                 $sql = "SELECT * FROM products WHERE is_active = 1 $search_sql";
+                //nếu có lọc theo danh mục
                 if (isset($_GET['cat']) && !empty($_GET['cat'])) {
                     $cat = $conn->real_escape_string($_GET['cat']);
                     $sql .= " AND category = '$cat'";
@@ -60,6 +64,7 @@ if ($search !== '') {
                 if ($result->num_rows == 0) {
                     echo "<p class='no-results'>Không tìm thấy sách nào phù hợp 😔</p>";
                 } else {
+                    // Hiển thị từng sách
                     while ($p = $result->fetch_assoc()) {
                         $img = !empty($p['image']) ? (str_starts_with($p['image'], 'http') ? $p['image'] : "../uploads/" . basename($p['image'])) : '../images/no-image.jpg';
                         $title = htmlspecialchars($p['title']);

@@ -1,39 +1,42 @@
-<!-- doanh thu -->
 <?php
+// admin thống kê doanh thu
 include "config.php";
 include "session.php";
-requireLogin();
-requireAdmin();
+requireLogin(); // bắt buuoocj phải đăng nhập
+requireAdmin(); // chỉ admin mới được truy cập
 
-// Helper to get a single numeric value
+// Helper lấy giá trị số từ db
 function fetchValue(mysqli $conn, string $sql, string $types = '', array $params = []) {
     $stmt = $conn->prepare($sql);
     if ($types) {
-        $stmt->bind_param($types, ...$params);
+        $stmt->bind_param($types, ...$params); // gắn tham số nếu có 
     }
     $stmt->execute();
     $stmt->bind_result($val);
-    $stmt->fetch();
+    $stmt->fetch(); // lấy kết quả truy vấn 
     $stmt->close();
-    return $val ?? 0;
+    return $val ?? 0; // nếu không có dữ liệu trae về 
 }
 
-// Revenue metrics (only tính đơn đã giao)
+// thống kê doanhg thu chỉ tính đơn đã có trạng thái giao 
+//COALESCE dùng để trả về giá trị không NULL đầu tiên để tránh NULL khi tính tổng hoặc thống kê-> hệ thống luôn có giá trị mặc định như 0.
 $revenueToday  = fetchValue($conn, "SELECT COALESCE(SUM(total),0) FROM orders WHERE status='delivered' AND DATE(created_at)=CURDATE()");
-$revenueMonth  = fetchValue($conn, "SELECT COALESCE(SUM(total),0) FROM orders WHERE status='delivered' AND DATE_FORMAT(created_at,'%Y-%m') = DATE_FORMAT(CURDATE(),'%Y-%m')");
-$revenueAll    = fetchValue($conn, "SELECT COALESCE(SUM(total),0) FROM orders WHERE status='delivered'");
+$revenueMonth  = fetchValue($conn, "SELECT COALESCE(SUM(total),0) FROM orders WHERE status='delivered' AND DATE_FORMAT(created_at,'%Y-%m') = DATE_FORMAT(CURDATE(),'%Y-%m')"); // so sánh theo tháng - năm
+$revenueAll    = fetchValue($conn, "SELECT COALESCE(SUM(total),0) FROM orders WHERE status='delivered'");// tổng tiền các đơn đã giao
 
-// Order counts
-$ordersAll     = fetchValue($conn, "SELECT COUNT(*) FROM orders");
+// thống kê số lượng đơn hàng
+$ordersAll     = fetchValue($conn, "SELECT COUNT(*) FROM orders"); // tổng số đơn
 $ordersPending = fetchValue($conn, "SELECT COUNT(*) FROM orders WHERE status='pending'");
-$ordersShip    = fetchValue($conn, "SELECT COUNT(*) FROM orders WHERE status IN ('shipping','confirmed')");
-$ordersDone    = fetchValue($conn, "SELECT COUNT(*) FROM orders WHERE status='delivered'");
+$ordersShip    = fetchValue($conn, "SELECT COUNT(*) FROM orders WHERE status IN ('shipping','confirmed')");// đơn đang chờ xử lý
+$ordersDone    = fetchValue($conn, "SELECT COUNT(*) FROM orders WHERE status='delivered'"); // đơn đã hoàn thành 
 
 // Top sản phẩm bán chạy (theo quantity đã giao)
-$topProducts = [];
-$topSql = "SELECT p.title, SUM(o.quantity) as qty, SUM(o.total) as amount
+$topProducts = [];         // tổng số lượng bán    doanh thu
+// "0" bí danh của bảng order
+// Lấy dữ liệu từ bảng sản phẩm, chỉ tính sản phẩm đã được giao, lấy 5 sản phẩm bán chạy nhất
+$topSql = "SELECT p.title, SUM(o.quantity) as qty, SUM(o.total) as amount 
            FROM orders o
-           JOIN products p ON o.product_id = p.id
+           JOIN products p ON o.product_id = p.id   
            WHERE o.status = 'delivered'
            GROUP BY o.product_id
            ORDER BY qty DESC
@@ -50,6 +53,7 @@ if ($res) {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%230b5ed7'/%3E%3Cpath d='M20 25h40v50H20z' fill='%23fff'/%3E%3C/svg%3E">
   <title>Thống kê doanh thu</title>
   <link rel="stylesheet" href="../CSS/style.css">
   <link rel="stylesheet" href="../CSS/admin_dashboard.css">
@@ -71,14 +75,15 @@ if ($res) {
   </div>
 
   <div class="dashboard-wrap">
-    <h1 style="margin-bottom:1.5rem; color: var(--primary); display:flex; align-items:center; gap:0.5rem;">
+    <h1>
       <i class="fas fa-chart-line"></i> Thống kê doanh thu
     </h1>
 
     <div class="dash-grid">
       <div class="dash-card">
         <div class="dash-title"><i class="fas fa-wallet"></i> Doanh thu hôm nay</div>
-        <div class="dash-value">$<?php echo number_format($revenueToday, 2, '.', ','); ?></div>
+        <!-- lấy 2 chữ số thập phân -->
+        <div class="dash-value">$<?php echo number_format($revenueToday, 2, '.', ','); ?></div>  
         <div class="dash-sub">Đơn đã giao trong ngày</div>
       </div>
       <div class="dash-card">

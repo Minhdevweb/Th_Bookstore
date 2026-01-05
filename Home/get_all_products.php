@@ -1,5 +1,9 @@
 <?php
+// Lấy tất cả sản phẩm
 header('Content-Type: application/json');
+error_reporting(E_ALL);
+ini_set('display_errors', 0); // Tắt hiển thị lỗi để tránh output HTML
+ini_set('log_errors', 1); // Vẫn log lỗi vào log file
 include "config.php";
 
 // Đảm bảo cột is_active và stock tồn tại (giống get_products.php)

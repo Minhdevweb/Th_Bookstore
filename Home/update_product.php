@@ -1,6 +1,16 @@
 <?php
 header('Content-Type: application/json');
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
 include "config.php";
+include "session.php";
+
+// Chỉ admin mới có quyền cập nhật
+if (!isAdmin()) {
+    http_response_code(403);
+    echo json_encode(["status"=>"error","message"=>"Access denied"]);
+    exit;
+}
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     // Nhận dữ liệu từ form
@@ -38,7 +48,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         }
 
         if (move_uploaded_file($_FILES["image"]["tmp_name"], $target_file)) {
-            $imagePath = "../uploads/" . $fileName;
+            // Lưu chỉ tên file để thống nhất với add_products.php
+            $imagePath = $fileName;
         } else {
             echo json_encode(["status" => "error", "message" => "Failed to upload image"]);
             exit;
@@ -52,16 +63,16 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             $stmt->bind_param("sssddisi", $title, $author, $category, $price, $rating, $stock, $imagePath, $id);
         } else {
             $stmt = $conn->prepare("UPDATE products SET title=?, author=?, category=?, price=?, rating=?, image=? WHERE id=?");
-            $stmt->bind_param("sssdssi", $title, $author, $category, $price, $rating, $imagePath, $id);
+            $stmt->bind_param("sssddsi", $title, $author, $category, $price, $rating, $imagePath, $id);
         }
     } else {
         // Không có ảnh mới → chỉ cập nhật thông tin khác
         if ($stock !== null) {
             $stmt = $conn->prepare("UPDATE products SET title=?, author=?, category=?, price=?, rating=?, stock=? WHERE id=?");
-            $stmt->bind_param("sssd sii", $title, $author, $category, $price, $rating, $stock, $id);
+            $stmt->bind_param("sssddii", $title, $author, $category, $price, $rating, $stock, $id);
         } else {
             $stmt = $conn->prepare("UPDATE products SET title=?, author=?, category=?, price=?, rating=? WHERE id=?");
-            $stmt->bind_param("sssdsi", $title, $author, $category, $price, $rating, $id);
+            $stmt->bind_param("sssddi", $title, $author, $category, $price, $rating, $id);
         }
     }
 

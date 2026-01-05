@@ -1,4 +1,5 @@
 <!-- blog_sidebar.php -->
+ <!-- Đây là thanh sidebar (cột bên) của trang blog / danh sách sách, giúp người dùng lọc và xem sách dễ hơn. -->
 <div class="sidebar">
     <h3>Sắp xếp theo</h3>
     <select id="sortSelect" onchange="location.href='blog.php?s=<?= urlencode($search) ?>'">
@@ -10,7 +11,9 @@
     <ul class="category-list">
         <li><a href="blog.php">Tất cả</a></li>
         <?php
+        // Lấy danh sách thể loại từ database
         $cats = $conn->query("SELECT DISTINCT category FROM products WHERE category IS NOT NULL AND is_active = 1 ORDER BY category");
+       // Duyệt qua từng thể loại và tạo liên kết
         while ($row = $cats->fetch_assoc()) {
             $cat_raw = $row['category'];
             $cat = htmlspecialchars($cat_raw);
@@ -22,7 +25,7 @@
     </ul>
 
     <div class="sidebar-info">
-        <p><i class="fas fa-globe"></i> Độ uy tín: <strong>31</strong></p>
+        <p><i class="fas fa-globe"></i> Độ uy tín: <strong>100</strong></p>
         <p><i class="fas fa-eye"></i> ~4.000 lượt/tháng</p>
         <p><i class="fas fa-star"></i> Chấp nhận sách indie</p>
     </div>
