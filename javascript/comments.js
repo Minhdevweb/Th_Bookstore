@@ -33,7 +33,32 @@ document.addEventListener('DOMContentLoaded', function () {
                 throw new Error(`HTTP error! status: ${res.status}`);
             }
             
-            const data = await res.json();
+            const text = await res.text();
+            const contentType = res.headers.get('content-type') || '';
+            
+            // Kiểm tra nếu response không phải JSON
+            if (!contentType.includes('application/json')) {
+                console.error('Non-JSON response from add_comment.php:', text.substring(0, 200));
+                alert('Lỗi server: Nhận được response không phải JSON.');
+                return;
+            }
+            
+            // Kiểm tra nếu text bắt đầu bằng HTML tag
+            if (text.trim().startsWith('<')) {
+                console.error('HTML response received instead of JSON:', text.substring(0, 200));
+                alert('Lỗi server: Nhận được HTML thay vì JSON.');
+                return;
+            }
+            
+            let data;
+            try {
+                data = JSON.parse(text);
+            } catch (parseError) {
+                console.error('JSON parse error:', parseError);
+                console.error('Response text:', text.substring(0, 200));
+                alert('Lỗi server: Không thể parse JSON response.');
+                return;
+            }
 
             if (data.status === 'success') {
                 // Thêm bình luận mới lên đầu danh sách
@@ -74,7 +99,32 @@ document.addEventListener('DOMContentLoaded', function () {
                 throw new Error(`HTTP error! status: ${res.status}`);
             }
             
-            const comments = await res.json();
+            const text = await res.text();
+            const contentType = res.headers.get('content-type') || '';
+            
+            // Kiểm tra nếu response không phải JSON
+            if (!contentType.includes('application/json')) {
+                console.error('Non-JSON response from get_comment.php:', text.substring(0, 200));
+                commentsContainer.innerHTML = '<p>Lỗi khi tải bình luận. Vui lòng thử lại sau.</p>';
+                return;
+            }
+            
+            // Kiểm tra nếu text bắt đầu bằng HTML tag
+            if (text.trim().startsWith('<')) {
+                console.error('HTML response received instead of JSON:', text.substring(0, 200));
+                commentsContainer.innerHTML = '<p>Lỗi khi tải bình luận. Vui lòng thử lại sau.</p>';
+                return;
+            }
+            
+            let comments;
+            try {
+                comments = JSON.parse(text);
+            } catch (parseError) {
+                console.error('JSON parse error:', parseError);
+                console.error('Response text:', text.substring(0, 200));
+                commentsContainer.innerHTML = '<p>Lỗi khi tải bình luận. Vui lòng thử lại sau.</p>';
+                return;
+            }
             if (comments.length === 0) {
                 commentsContainer.innerHTML = '<p>Chưa có bình luận nào. Hãy là người đầu tiên!</p>';
                 countSpan.textContent = 'Bình luận (0)';

@@ -81,7 +81,7 @@ function showCart() {
       cartTotal.textContent = total.toFixed(2); // CẬP NHẬT TỔNG TIỀN
     });
 }
-
+//* Cập nhật số lượng của một sản phẩm trong giỏ hàng
 function updateCart(productId, quantity) {
   fetch('cart.php', {
     method: 'POST',
@@ -91,11 +91,11 @@ function updateCart(productId, quantity) {
   .then(res => res.json())
   .then(data => {
     if (data.status === 'success') {
-      showCart();
+      showCart();// Cập nhật lại giao diện giỏ hàng sau khi thành công
     }
   });
 }
-
+//Xóa một sản phẩm khỏi giỏ hàng
 function removeFromCart(productId) {
   fetch('cart.php', {
     method: 'POST',
@@ -105,7 +105,7 @@ function removeFromCart(productId) {
   .then(res => res.json())
   .then(data => {
     if (data.status === 'success') {
-      showCart();
+      showCart(); // Cập nhật lại giao diện giỏ hàng sau khi thành công
     }
   });
 }
@@ -115,13 +115,14 @@ function checkout() {
     .then(res => res.json())
     .then(resp => {
       const items = Array.isArray(resp) ? resp : (resp.items || []);
-      const promises = items.map(item => fetch('orders.php', {
+      const promises = items.map(item => fetch('orders.php', { // gửi đơn hàng cho từng sản phẩm
         method: 'POST',
         headers: {'Content-Type': 'application/x-www-form-urlencoded'},
         body: `product_id=${item.id}&quantity=${item.quantity}`
       }));
 
       Promise.all(promises)
+      // Sau khi tất cả đơn hàng được gửi thành công, xóa giỏ hàng
         .then(() => fetch('cart.php', {
           method: 'POST',
           headers: {'Content-Type': 'application/x-www-form-urlencoded'},
@@ -134,11 +135,12 @@ function checkout() {
     });
 }
 
-// Event: checkout button
+// Khi người dùng bấm nút "Checkout" hoặc "Thanh toán"
 (function () {
   const btn = document.getElementById('checkout');
   if (btn) btn.addEventListener('click', function(e){
     e.preventDefault();
+    // Chuyển hướng đến trang giỏ hàng chi tiết (checkout.php)
     window.location.href = 'checkout.php';
   });
 })();

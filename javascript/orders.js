@@ -1,4 +1,6 @@
-// Orders and admin order functions extracted from Home/index.php
+//hiển thị và quản lý đơn hàng  (có phân quyền khách hàng và admin):
+
+// Hiển thị đơn hàng của khách hàng
 function showOrders() {
   fetch('orders.php')
     .then(res => res.json())
@@ -15,10 +17,10 @@ function showOrders() {
             <p>Date: ${new Date(order.created_at).toLocaleDateString()}</p>
           </div>
         </div>
-      `).join('');
+      `).join(''); // Ghép tất cả đơn hàng lại thành chuỗi
     });
 }
-
+// hiển thị đơn hàng của admin
 function showAdminOrders() {
   fetch('orders.php')
     .then(res => res.json())
@@ -42,7 +44,7 @@ function showAdminOrders() {
       `).join('');
     });
 }
-
+// Cập nhật trạng thái đơn hàng (dành cho admin)
 function updateOrderStatus(orderId, status) {
   fetch('update_order_status.php', {
     method: 'POST',
@@ -57,7 +59,7 @@ function updateOrderStatus(orderId, status) {
   });
 }
 
-// Event bindings
+// Gán sự kiện cho nút xem đơn hàng
 (function () {
   const ordersBtn = document.getElementById('ordersBtn');
   if (ordersBtn) {

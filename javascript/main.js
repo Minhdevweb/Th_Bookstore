@@ -1,28 +1,25 @@
-const qs = (selector) => document.querySelector(selector);
-const qsAll = (selector) => document.querySelectorAll(selector);
+const qs = (selector) => document.querySelector(selector); //lấy 1 ptu
+const qsAll = (selector) => document.querySelectorAll(selector); //lấy nhiều ptu
 
 let products = [];
 let cart = [];
 
-// NOTE: removed debug probe to add_products.php because it returns 403 for non-admins
-// and produced noise in the console. Real requests will be done when the admin
-// submits the Add Product form.
 
 // --- Lấy dữ liệu sản phẩm ---
 let currentPage = 1;
 let totalPages = 1;
-let selectedMood = "";
-
+let selectedMood = ""; // Lọc theo thể loại
+// Tải sản phẩm từ get_products.php với phân trang
 async function loadProducts(page = 1) {
   try {
-    const response = await fetch(`get_products.php?page=${page}`);
-    const data = await response.json();
-    if (data.status !== 'success') return;
+    const response = await fetch(`get_products.php?page=${page}`); // Gọi API lấy sản phẩm
+    const data = await response.json();// Chuyển phản hồi sang JSON
+    if (data.status !== 'success') return;// Kiểm tra trạng thái
 
-    products = data.products;
-    currentPage = data.currentPage;
-    totalPages = data.totalPages;
-    renderProducts(products);
+    products = data.products;// Lưu danh sách sản phẩm
+    currentPage = data.currentPage;// Trang hiện tại
+    totalPages = data.totalPages;// Tổng số trang
+    renderProducts(products);// Hiển thị sản phẩm
     renderPagination();
   } catch (error) {
     console.error('Error loading products:', error);
@@ -33,37 +30,38 @@ loadProducts();
 // Merge giỏ hàng lưu tạm (localStorage) vào giỏ hàng server nếu đã đăng nhập
 (async function mergeGuestCartIntoServer() {
   try {
-    const raw = localStorage.getItem('guest_cart') || '{}';
-    const guest = JSON.parse(raw);
-    const ids = Object.keys(guest);
-    if (!ids.length) return;
+    const raw = localStorage.getItem('guest_cart') || '{}';// Lấy giỏ tạm
+    const guest = JSON.parse(raw);// Chuyển sang object
+    const ids = Object.keys(guest);// Lấy danh sách product_id
+    if (!ids.length) return; // Không có gì để merge
+    // Duyệt từng sản phẩm trong giỏ
     for (const id of ids) {
-      const qty = parseInt(guest[id], 10) || 1;
-      const r = await fetch('cart.php', {
+      const qty = parseInt(guest[id], 10) || 1;// Số lượng
+      const r = await fetch('cart.php', {// Gọi API thêm vào giỏ server
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: `action=add&product_id=${encodeURIComponent(id)}&quantity=${encodeURIComponent(qty)}`
+        body: `action=add&product_id=${encodeURIComponent(id)}&quantity=${encodeURIComponent(qty)}` // Dữ liệu gửi đi
       });
       const res = await r.json();
-      if (res && res.status === 'success') {
+      if (res && res.status === 'success') {// Nếu thêm thành công thì xóa khỏi giỏ tạm
         delete guest[id];
       }
     }
     // Cập nhật lại/clear guest cart nếu đã merge hết
     const remaining = Object.keys(guest).length;
     if (remaining) {
-      localStorage.setItem('guest_cart', JSON.stringify(guest));
+      localStorage.setItem('guest_cart', JSON.stringify(guest));   // Còn sản phẩm chưa merge
     } else {
-      localStorage.removeItem('guest_cart');
+      localStorage.removeItem('guest_cart');// Đã merge hết, xóa giỏ tạm
     }
     // cập nhật hiển thị số lượng (nếu cần)
     const el = qs('#cartCount');
     if (el && typeof fetch === 'function') {
       try {
-        const r = await fetch('cart.php');
+        const r = await fetch('cart.php');  // Lấy số lượng giỏ hàng hiện tại
         const data = await r.json();
-        const count = Array.isArray(data) ? data.length : (data.totalItems || (data.items ? data.items.length : 0));
-        el.textContent = count;
+        const count = Array.isArray(data) ? data.length : (data.totalItems || (data.items ? data.items.length : 0));   // Tính số lượng
+        el.textContent = count;// Cập nhật hiển thị
       } catch {}
     }
   } catch (_) {}
@@ -139,36 +137,36 @@ loadProducts();
     }
   } catch (_) {}
 })();
-
+// --- Phân trang ---
 function renderPagination() {
   const pagDiv = document.getElementById('pagination');
-  // build a compact page list (e.g. 1 2 3 ... 17) with neighbors around current
+  // Nếu không có phân trang thì ẩn
   function buildPages(cur, total) {
     const pages = [];
-    if (total <= 7) {
-      for (let i = 1; i <= total; i++) pages.push(i);
+    if (total <= 7) {// Hiển thị tất cả nếu tổng trang nhỏ hơn hoặc bằng 7
+      for (let i = 1; i <= total; i++) pages.push(i);// Thêm tất cả trang
       return pages;
     }
 
-    pages.push(1);
-    const left = Math.max(2, cur - 1);
-    const right = Math.min(total - 1, cur + 1);
+    pages.push(1);// Luôn hiển thị trang đầu tiên
+    const left = Math.max(2, cur - 1);// Trang bên trái gần nhất
+    const right = Math.min(total - 1, cur + 1);// Trang bên phải gần nhất
 
-    if (left > 2) pages.push('...');
+    if (left > 2) pages.push('...');// Hiển thị dấu ... nếu khoảng cách lớn hơn 1
 
-    for (let i = left; i <= right; i++) pages.push(i);
+    for (let i = left; i <= right; i++) pages.push(i);// Thêm các trang giữa
 
-    if (right < total - 1) pages.push('...');
+    if (right < total - 1) pages.push('...'); // Hiển thị dấu ... nếu khoảng cách lớn hơn 1
 
     pages.push(total);
     return pages;
   }
-
+// Tạo HTML phân trang
   const pages = buildPages(currentPage, totalPages);
 
   pagDiv.innerHTML = `
     <nav class="pagination-wrap">
-      <button class="page-arrow" id="prevPage" ${currentPage <= 1 ? 'disabled' : ''} aria-label="Previous">‹</button>
+      <button class="page-arrow" id="prevPage" ${currentPage <= 1 ? 'disabled' : ''} aria-label="Previous">‹</button> 
       <ul class="page-list">
         ${pages.map(p => {
           if (p === '...') return `<li class="page-ellipsis">${p}</li>`;
@@ -179,31 +177,31 @@ function renderPagination() {
     </nav>
   `;
 
-  // attach handlers
+  // Gán sự kiện cho nút trước sau và các nút trang
   const prev = document.getElementById('prevPage');
   const next = document.getElementById('nextPage');
-  if (prev) prev.onclick = () => { if (currentPage > 1) loadProducts(currentPage - 1); };
-  if (next) next.onclick = () => { if (currentPage < totalPages) loadProducts(currentPage + 1); };
-
+  if (prev) prev.onclick = () => { if (currentPage > 1) loadProducts(currentPage - 1); }; // Chuyển về trang trước
+  if (next) next.onclick = () => { if (currentPage < totalPages) loadProducts(currentPage + 1); }; // Chuyển về trang sau
+// Nút trang cụ thể
   qsAll('.page-btn').forEach(b => {
-    b.addEventListener('click', (e) => {
-      const p = Number(e.currentTarget.getAttribute('data-page'));
-      if (!isNaN(p) && p !== currentPage) loadProducts(p);
+    b.addEventListener('click', (e) => { // Lấy số trang từ data-page
+      const p = Number(e.currentTarget.getAttribute('data-page'));// Chuyển đến trang được chọn
+      if (!isNaN(p) && p !== currentPage) loadProducts(p);// Tải trang
     });
   });
 }
 
-// Small view helpers
+// --- Hiển thị sản phẩm ---
 function formatImageSrc(src) {
   if (!src) return '';
-  if (!src.startsWith('http') && !src.startsWith('../uploads/')) return '../uploads/' + src;
+  if (!src.startsWith('http') && !src.startsWith('../uploads/')) return '../uploads/' + src; // THÊM ĐƯƠNG DÂN UPLOADS NẾU LÀ ẢNH LOCAL
   return src;
 }
-
+// Kiểm tra sản phẩm hết hàng
 function isOutOfStock(p) {
-  return typeof p.stock !== 'undefined' && Number(p.stock) === 0;
+  return typeof p.stock !== 'undefined' && Number(p.stock) === 0; // Nếu tồn kho được định nghĩa và bằng 0 thì hết hàng
 }
-
+// Tạo HTML cho một thẻ sản phẩm
 function productCardHtml(p, adminButtons) {
   const imgSrc = formatImageSrc(p.image);
   const out = isOutOfStock(p);
@@ -258,7 +256,7 @@ function animateProductToCart(productElement, cartIcon) {
       resolve();
       return;
     }
-    
+    // Tạo clone và thiết lập kiểu ban đầu
     const clone = productImg.cloneNode(true);
     clone.style.position = 'fixed';
     clone.style.zIndex = '10000';
@@ -301,7 +299,7 @@ function animateProductToCart(productElement, cartIcon) {
     }, 600);
   });
 }
-
+    // Thêm sản phẩm vào giỏ hàng
 async function addToCart(productId, event) {
   try {
     // Tìm element sản phẩm và nút thêm vào giỏ
@@ -315,13 +313,13 @@ async function addToCart(productId, event) {
     if (productCard && cartIcon) {
       await animateProductToCart(productCard, cartIcon);
     }
-    
+    // Gửi yêu cầu thêm vào giỏ hàng
     const response = await fetch('cart.php', {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: `action=add&product_id=${productId}&quantity=1`
     });
-    
+    // Xử lý phản hồi từ server
     const text = await response.text();
     const contentType = response.headers.get('content-type') || '';
     
@@ -338,7 +336,7 @@ async function addToCart(productId, event) {
       alert('Lỗi server: Nhận được HTML thay vì JSON. Vui lòng thử lại.');
       return;
     }
-    
+      // Chuyển text sang object JSON
     let res;
     try {
       res = JSON.parse(text);
@@ -365,12 +363,12 @@ async function addToCart(productId, event) {
       }
       return alert(res.message || 'Thêm vào giỏ không thành công');
     }
-
+    // Cập nhật số lượng giỏ hàng hiển thị
     const count = typeof res.totalItems !== 'undefined'
-      ? res.totalItems
-      : (res.cart ? Object.values(res.cart).reduce((sum, qty) => sum + qty, 0) : 0);
-    const el = qs('#cartCount');
-    if (el) el.textContent = count;
+      ? res.totalItems// Sử dụng totalItems nếu có
+      : (res.cart ? Object.values(res.cart).reduce((sum, qty) => sum + qty, 0) : 0);  // Tính tổng số lượng từ cart nếu có
+    const el = qs('#cartCount');// Cập nhật hiển thị
+    if (el) el.textContent = count;// Cập nhật số lượng hiển thị
     
     // Cập nhật và hiển thị modal giỏ hàng
     if (typeof showCart === 'function') {
@@ -386,19 +384,19 @@ async function addToCart(productId, event) {
     alert('Lỗi mạng khi thêm vào giỏ hàng: ' + error.message);
   }
 }
-
+// Cập nhật giao diện giỏ hàng trong modal
 function updateCartUI() {
   const cartContainer = qs('#cartItems');
   const totalElement = qs('#cartTotal');
 
   if (!cartContainer) return;
-
+// Nếu giỏ hàng trống
   if (cart.length === 0) {
     cartContainer.innerHTML = '<p class="empty-note">Cart is empty.</p>';
     totalElement.textContent = '0.00';
     return;
   }
-
+// Hiển thị các sản phẩm trong giỏ hàng
   let total = 0;
   cartContainer.innerHTML = cart.map(p => {
     total += p.price * p.quantity;
@@ -413,10 +411,10 @@ function updateCartUI() {
       </div>
     `;
   }).join('');
-
+// Cập nhật tổng tiền
   totalElement.textContent = total.toFixed(2);
 }
-
+// Xóa sản phẩm khỏi giỏ hàng
 async function removeFromCart(productId) {
   try {
     const response = await fetch('cart.php', {
@@ -425,18 +423,18 @@ async function removeFromCart(productId) {
       body: `action=remove&product_id=${productId}`
     });
     const res = await response.json();
-    if (res.status !== 'success') return alert(res.message || 'Remove failed');
-
-    const count = typeof res.totalItems !== 'undefined' ? res.totalItems : 0;
-    const el = qs('#cartCount');
-    if (el) el.textContent = count;
-    if (typeof showCart === 'function') showCart();
+    if (res.status !== 'success') return alert(res.message || 'Remove failed');   // Hiển thị lỗi nếu có
+    // Cập nhật giỏ hàng hiện tại
+    const count = typeof res.totalItems !== 'undefined' ? res.totalItems : 0;// Cập nhật số lượng
+    const el = qs('#cartCount');// Cập nhật hiển thị
+    if (el) el.textContent = count;// Cập nhật số lượng hiển thị
+    if (typeof showCart === 'function') showCart();// Cập nhật hiển thị giỏ hàng
   } catch (error) {
-    console.error('Error removing from cart:', error);
+    console.error('Error removing from cart:', error);// Hiển thị lỗi
     alert('Network error');
   }
 }
-// Helper to open modal using page functions when available
+// Helper to show modal using page functions when available
 function showModal(id) {
   if (typeof openModal === 'function') {
     openModal(id);

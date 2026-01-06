@@ -76,16 +76,16 @@ function startHeroCarousel(items) {
   }
 
   // Chạy slide mỗi 5s
-  heroIntervalId = setInterval(() => {
-    heroIndex = (heroIndex + 1) % heroProducts.length;
-    updateHeroSlide();
-  }, 5000);
+  heroIntervalId = setInterval(() => {// Cập nhật chỉ số
+    heroIndex = (heroIndex + 1) % heroProducts.length;// Vòng lại đầu nếu vượt quá
+    updateHeroSlide();// Cập nhật nội dung slide
+  }, 5000);// 5000ms = 5s
 }
 
 /**
  * Tải toàn bộ sản phẩm và khởi chạy carousel
  */
-(async function initHeroCarousel() {
+(async function initHeroCarousel() {  //
   try {
     const res = await fetch('get_all_products.php');
     const text = await res.text();
